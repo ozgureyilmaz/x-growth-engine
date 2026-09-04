@@ -1,0 +1,14 @@
+{
+  "name": "x-growth-engine",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Bounded, read-only X research pipeline for Marx prospect discovery",
+  "scripts": {
+    "check": "node --check scripts/run-comprehensive.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

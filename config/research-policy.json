@@ -1,0 +1,43 @@
+{
+  "status": "proposed — confirm before live run",
+  "source": "XActions MCP public read tools",
+  "platform": "twitter",
+  "language": "en",
+  "lookback_days": 90,
+  "max_buckets": 12,
+  "max_queries_per_bucket": 10,
+  "max_search_calls": 120,
+  "result_limit_per_query": 10,
+  "max_raw_tweets": 1200,
+  "max_unique_authors": 500,
+  "max_enriched_authors": 200,
+  "recent_tweets_per_author": 20,
+  "inter_call_delay_seconds": 3,
+  "retry_transient_attempts": 2,
+  "max_consecutive_runtime_failures": 3,
+  "scorer_path": null,
+  "control_query": "the",
+  "network_expansion": "disabled",
+  "write_actions": "disabled",
+  "private_contact_inference": "disabled",
+  "query_exclusions": ["-airdrop", "-giveaway"],
+  "hard_stop_conditions": [
+    "AUTH_REQUIRED or login wall",
+    "rate-limit, challenge, or suspicious-activity interstitial",
+    "more than max_raw_tweets collected",
+    "more than max_unique_authors discovered",
+    "three repeated runtime failures",
+    "any requested write/action tool or page action"
+  ],
+  "review_gate": {
+    "high_intent_score": 70,
+    "review_score": 50,
+    "promotion_requires": [
+      "dated public X evidence within the lookback window",
+      "explicit person-to-AI-trading/finance-agent relationship",
+      "direct crypto, stock, quant, or prediction-market relevance",
+      "verified identity-to-account match"
+    ],
+    "outreach": "human approval required; not part of scraper"
+  }
+}

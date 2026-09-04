@@ -1,0 +1,2966 @@
+{
+  "schema_version": 1,
+  "run_id": "20260902T114600Z",
+  "run_started_at": "2026-09-02T11:46:00.893Z",
+  "run_finished_at": "2026-09-02T14:55:25.135Z",
+  "lookback_since": "2026-06-04",
+  "source": "XActions MCP public read tools",
+  "platform": "twitter",
+  "limits": {
+    "max_buckets": 12,
+    "max_queries_per_bucket": 10,
+    "max_search_calls": 120,
+    "result_limit_per_query": 10,
+    "max_raw_tweets": 1200,
+    "max_unique_authors": 500,
+    "max_enriched_authors": 200,
+    "recent_tweets_per_author": 20,
+    "inter_call_delay_seconds": 3
+  },
+  "control_check": {
+    "query": "the lang:en since:2026-06-04 -airdrop -giveaway",
+    "status": "passed",
+    "result_count": 1
+  },
+  "queries": [
+    {
+      "index": 0,
+      "bucket": "direct_ai_trading",
+      "variant": "\"AI trading agent\"",
+      "query": "\"AI trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:55:24.419Z"
+    },
+    {
+      "index": 1,
+      "bucket": "direct_ai_trading",
+      "variant": "\"autonomous trading agent\"",
+      "query": "\"autonomous trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"autonomous trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:55:43.677Z"
+    },
+    {
+      "index": 2,
+      "bucket": "direct_ai_trading",
+      "variant": "\"agentic trading\"",
+      "query": "\"agentic trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"agentic trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:56:05.019Z"
+    },
+    {
+      "index": 3,
+      "bucket": "direct_ai_trading",
+      "variant": "\"AI trader\"",
+      "query": "\"AI trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:56:25.138Z"
+    },
+    {
+      "index": 4,
+      "bucket": "direct_ai_trading",
+      "variant": "\"AI trading bot\"",
+      "query": "\"AI trading bot\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading bot\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T11:57:07.046Z"
+    },
+    {
+      "index": 5,
+      "bucket": "direct_ai_trading",
+      "variant": "\"AI for trading\"",
+      "query": "\"AI for trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai for trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:57:18.123Z"
+    },
+    {
+      "index": 6,
+      "bucket": "direct_ai_trading",
+      "variant": "\"AI finance agent\"",
+      "query": "\"AI finance agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai finance agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:57:37.062Z"
+    },
+    {
+      "index": 7,
+      "bucket": "direct_ai_trading",
+      "variant": "\"autonomous trader\"",
+      "query": "\"autonomous trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"autonomous trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 1,
+      "completed_at": "2026-09-02T11:58:07.079Z"
+    },
+    {
+      "index": 8,
+      "bucket": "direct_ai_trading",
+      "variant": "\"AI market agent\"",
+      "query": "\"AI market agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai market agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:58:20.460Z"
+    },
+    {
+      "index": 9,
+      "bucket": "direct_ai_trading",
+      "variant": "\"financial trading agent\"",
+      "query": "\"financial trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"financial trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:58:33.670Z"
+    },
+    {
+      "index": 10,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "(autonomous OR agentic) trading (agent OR bot)",
+      "query": "(autonomous OR agentic) trading (agent OR bot) lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "(autonomous or agentic) trading (agent or bot) lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T11:59:14.267Z"
+    },
+    {
+      "index": 11,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"autonomous trading\" AI",
+      "query": "\"autonomous trading\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"autonomous trading\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T11:59:28.541Z"
+    },
+    {
+      "index": 12,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"agentic finance\" trading",
+      "query": "\"agentic finance\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"agentic finance\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:47:00.122Z"
+    },
+    {
+      "index": 13,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"autonomous trader\" building",
+      "query": "\"autonomous trader\" building lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"autonomous trader\" building lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:47:35.348Z"
+    },
+    {
+      "index": 14,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"agent loop\" trading",
+      "query": "\"agent loop\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"agent loop\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:48:20.754Z"
+    },
+    {
+      "index": 15,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"multi-agent\" trading",
+      "query": "\"multi-agent\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"multi-agent\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:48:49.433Z"
+    },
+    {
+      "index": 16,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"LLM agent\" executes trades",
+      "query": "\"LLM agent\" executes trades lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"llm agent\" executes trades lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:49:18.083Z"
+    },
+    {
+      "index": 17,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"AI agent\" market execution",
+      "query": "\"AI agent\" market execution lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai agent\" market execution lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:49:30.578Z"
+    },
+    {
+      "index": 18,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"autonomous portfolio\" agent",
+      "query": "\"autonomous portfolio\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"autonomous portfolio\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:49:42.738Z"
+    },
+    {
+      "index": 19,
+      "bucket": "autonomous_agentic_trading",
+      "variant": "\"self-driving\" trading agent",
+      "query": "\"self-driving\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"self-driving\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:50:21.239Z"
+    },
+    {
+      "index": 20,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"AI crypto trading\"",
+      "query": "\"AI crypto trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai crypto trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:41:26.952Z"
+    },
+    {
+      "index": 21,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"AI crypto trader\"",
+      "query": "\"AI crypto trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai crypto trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 3,
+      "completed_at": "2026-09-02T14:42:00.917Z"
+    },
+    {
+      "index": 22,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"crypto trading agent\"",
+      "query": "\"crypto trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"crypto trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:42:15.448Z"
+    },
+    {
+      "index": 23,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"autonomous crypto trader\"",
+      "query": "\"autonomous crypto trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"autonomous crypto trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:42:45.802Z"
+    },
+    {
+      "index": 24,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"AI agent\" crypto trading",
+      "query": "\"AI agent\" crypto trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai agent\" crypto trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:43:05.572Z"
+    },
+    {
+      "index": 25,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"LLM trading\" crypto",
+      "query": "\"LLM trading\" crypto lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"llm trading\" crypto lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:43:39.897Z"
+    },
+    {
+      "index": 26,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"onchain trading agent\"",
+      "query": "\"onchain trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"onchain trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:44:19.553Z"
+    },
+    {
+      "index": 27,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"DeFi trading agent\"",
+      "query": "\"DeFi trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"defi trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:44:54.344Z"
+    },
+    {
+      "index": 28,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"Solana trading agent\"",
+      "query": "\"Solana trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"solana trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:45:31.526Z"
+    },
+    {
+      "index": 29,
+      "bucket": "ai_crypto_trading",
+      "variant": "\"Hyperliquid\" agent trading",
+      "query": "\"Hyperliquid\" agent trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"hyperliquid\" agent trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:46:08.849Z"
+    },
+    {
+      "index": 30,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"AI stock trading\" agent",
+      "query": "\"AI stock trading\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai stock trading\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 5,
+      "completed_at": "2026-09-02T14:27:21.923Z"
+    },
+    {
+      "index": 31,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"AI portfolio agent\"",
+      "query": "\"AI portfolio agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai portfolio agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:27:52.552Z"
+    },
+    {
+      "index": 32,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"AI portfolio management\"",
+      "query": "\"AI portfolio management\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai portfolio management\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:28:22.104Z"
+    },
+    {
+      "index": 33,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"autonomous stock trader\"",
+      "query": "\"autonomous stock trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"autonomous stock trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:28:52.429Z"
+    },
+    {
+      "index": 34,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"LLM stock trading\"",
+      "query": "\"LLM stock trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"llm stock trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:29:22.422Z"
+    },
+    {
+      "index": 35,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"options trading agent\"",
+      "query": "\"options trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"options trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:29:53.032Z"
+    },
+    {
+      "index": 36,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"AI investment agent\"",
+      "query": "\"AI investment agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai investment agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:30:23.551Z"
+    },
+    {
+      "index": 37,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"AI equities trading\"",
+      "query": "\"AI equities trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai equities trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:30:52.216Z"
+    },
+    {
+      "index": 38,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"portfolio automation\" AI",
+      "query": "\"portfolio automation\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"portfolio automation\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:31:23.214Z"
+    },
+    {
+      "index": 39,
+      "bucket": "ai_stock_portfolio_trading",
+      "variant": "\"Robinhood\" AI trading agent",
+      "query": "\"Robinhood\" AI trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"robinhood\" ai trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:31:53.261Z"
+    },
+    {
+      "index": 40,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"AI quantitative trading\"",
+      "query": "\"AI quantitative trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai quantitative trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:32:23.024Z"
+    },
+    {
+      "index": 41,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"AI algo trading\"",
+      "query": "\"AI algo trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai algo trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:32:54.998Z"
+    },
+    {
+      "index": 42,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"algorithmic trading\" AI agent",
+      "query": "\"algorithmic trading\" AI agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"algorithmic trading\" ai agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:33:24.635Z"
+    },
+    {
+      "index": 43,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"LLM\" quant trading",
+      "query": "\"LLM\" quant trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"llm\" quant trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:33:55.320Z"
+    },
+    {
+      "index": 44,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"machine learning\" trading strategy",
+      "query": "\"machine learning\" trading strategy lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"machine learning\" trading strategy lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:34:12.843Z"
+    },
+    {
+      "index": 45,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"quant agent\"",
+      "query": "\"quant agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"quant agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:34:27.322Z"
+    },
+    {
+      "index": 46,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"systematic trading\" AI",
+      "query": "\"systematic trading\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"systematic trading\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:34:40.985Z"
+    },
+    {
+      "index": 47,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"algorithmic trader\" building",
+      "query": "\"algorithmic trader\" building lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"algorithmic trader\" building lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 2,
+      "completed_at": "2026-09-02T14:35:16.537Z"
+    },
+    {
+      "index": 48,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"quantitative finance\" agent",
+      "query": "\"quantitative finance\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"quantitative finance\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:35:31.497Z"
+    },
+    {
+      "index": 49,
+      "bucket": "quant_algorithmic_trading",
+      "variant": "\"AI trading strategy\" code",
+      "query": "\"AI trading strategy\" code lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading strategy\" code lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 4,
+      "completed_at": "2026-09-02T14:36:03.310Z"
+    },
+    {
+      "index": 50,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"AI backtesting\"",
+      "query": "\"AI backtesting\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai backtesting\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:09:24.796Z"
+    },
+    {
+      "index": 51,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"AI agent\" backtesting",
+      "query": "\"AI agent\" backtesting lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai agent\" backtesting lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:09:37.661Z"
+    },
+    {
+      "index": 52,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"LLM\" backtesting",
+      "query": "\"LLM\" backtesting lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"llm\" backtesting lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:09:49.545Z"
+    },
+    {
+      "index": 53,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"backtesting agent\"",
+      "query": "\"backtesting agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"backtesting agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 7,
+      "completed_at": "2026-09-02T14:10:27.694Z"
+    },
+    {
+      "index": 54,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"automated trading strategy\" AI",
+      "query": "\"automated trading strategy\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"automated trading strategy\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:10:41.558Z"
+    },
+    {
+      "index": 55,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"trading strategy automation\"",
+      "query": "\"trading strategy automation\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trading strategy automation\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:11:09.464Z"
+    },
+    {
+      "index": 56,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"natural language\" trading strategy",
+      "query": "\"natural language\" trading strategy lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"natural language\" trading strategy lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:11:40.563Z"
+    },
+    {
+      "index": 57,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"strategy research agent\"",
+      "query": "\"strategy research agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"strategy research agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:12:10.654Z"
+    },
+    {
+      "index": 58,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"backtest trading bot\" AI",
+      "query": "\"backtest trading bot\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"backtest trading bot\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:12:39.115Z"
+    },
+    {
+      "index": 59,
+      "bucket": "backtesting_strategy_automation",
+      "variant": "\"automated strategy\" crypto",
+      "query": "\"automated strategy\" crypto lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"automated strategy\" crypto lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:13:09.884Z"
+    },
+    {
+      "index": 60,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"execution agent\" trading",
+      "query": "\"execution agent\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"execution agent\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:13:39.932Z"
+    },
+    {
+      "index": 61,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"AI risk management\" trading",
+      "query": "\"AI risk management\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai risk management\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:14:12.829Z"
+    },
+    {
+      "index": 62,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"risk agent\" portfolio",
+      "query": "\"risk agent\" portfolio lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"risk agent\" portfolio lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:14:40.890Z"
+    },
+    {
+      "index": 63,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"portfolio rebalancing agent\"",
+      "query": "\"portfolio rebalancing agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"portfolio rebalancing agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:15:11.940Z"
+    },
+    {
+      "index": 64,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"trade execution\" AI agent",
+      "query": "\"trade execution\" AI agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trade execution\" ai agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:15:41.620Z"
+    },
+    {
+      "index": 65,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"automated risk controls\" trading",
+      "query": "\"automated risk controls\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"automated risk controls\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:16:12.217Z"
+    },
+    {
+      "index": 66,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"portfolio agent\" crypto",
+      "query": "\"portfolio agent\" crypto lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"portfolio agent\" crypto lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:16:42.763Z"
+    },
+    {
+      "index": 67,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"market data agent\" trading",
+      "query": "\"market data agent\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"market data agent\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:17:11.715Z"
+    },
+    {
+      "index": 68,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"capital allocation agent\"",
+      "query": "\"capital allocation agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"capital allocation agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:17:40.618Z"
+    },
+    {
+      "index": 69,
+      "bucket": "execution_risk_portfolio_agents",
+      "variant": "\"MCP\" trading execution",
+      "query": "\"MCP\" trading execution lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"mcp\" trading execution lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:18:12.149Z"
+    },
+    {
+      "index": 70,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "(founder OR builder OR developer) (\"trading agent\" OR \"finance agent\")",
+      "query": "(founder OR builder OR developer) (\"trading agent\" OR \"finance agent\") lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "(founder or builder or developer) (\"trading agent\" or \"finance agent\") lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T12:02:17.849Z"
+    },
+    {
+      "index": 71,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"built an AI trading\"",
+      "query": "\"built an AI trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"built an ai trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T12:02:39.098Z"
+    },
+    {
+      "index": 72,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"building an AI trader\"",
+      "query": "\"building an AI trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"building an ai trader\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T12:03:12.845Z"
+    },
+    {
+      "index": 73,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"launched\" \"AI trading\"",
+      "query": "\"launched\" \"AI trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"launched\" \"ai trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T12:03:35.968Z"
+    },
+    {
+      "index": 74,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"founder\" \"trading agent\"",
+      "query": "\"founder\" \"trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"founder\" \"trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T12:03:50.006Z"
+    },
+    {
+      "index": 75,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"build in public\" \"AI trading\"",
+      "query": "\"build in public\" \"AI trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"build in public\" \"ai trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 6,
+      "completed_at": "2026-09-02T14:03:28.100Z"
+    },
+    {
+      "index": 76,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"shipping\" \"trading agent\"",
+      "query": "\"shipping\" \"trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"shipping\" \"trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:03:41.103Z"
+    },
+    {
+      "index": 77,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"finance agent\" startup",
+      "query": "\"finance agent\" startup lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"finance agent\" startup lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 8,
+      "completed_at": "2026-09-02T14:04:14.641Z"
+    },
+    {
+      "index": 78,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"AI trading product\" founder",
+      "query": "\"AI trading product\" founder lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading product\" founder lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:04:44.120Z"
+    },
+    {
+      "index": 79,
+      "bucket": "finance_agent_builders_founders",
+      "variant": "\"agent OS\" trading builder",
+      "query": "\"agent OS\" trading builder lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"agent os\" trading builder lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 5,
+      "completed_at": "2026-09-02T14:05:22.601Z"
+    },
+    {
+      "index": 80,
+      "bucket": "llm_trading_developers",
+      "variant": "\"LLM\" trading developer",
+      "query": "\"LLM\" trading developer lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"llm\" trading developer lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:05:39.813Z"
+    },
+    {
+      "index": 81,
+      "bucket": "llm_trading_developers",
+      "variant": "\"GPT\" trading bot code",
+      "query": "\"GPT\" trading bot code lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"gpt\" trading bot code lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:06:01.494Z"
+    },
+    {
+      "index": 82,
+      "bucket": "llm_trading_developers",
+      "variant": "\"Claude\" trading agent",
+      "query": "\"Claude\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"claude\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:06:14.795Z"
+    },
+    {
+      "index": 83,
+      "bucket": "llm_trading_developers",
+      "variant": "\"MCP server\" trading",
+      "query": "\"MCP server\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"mcp server\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:06:30.053Z"
+    },
+    {
+      "index": 84,
+      "bucket": "llm_trading_developers",
+      "variant": "\"AI coding\" trading bot",
+      "query": "\"AI coding\" trading bot lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai coding\" trading bot lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:07:06.518Z"
+    },
+    {
+      "index": 85,
+      "bucket": "llm_trading_developers",
+      "variant": "\"Python\" \"AI trading\"",
+      "query": "\"Python\" \"AI trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"python\" \"ai trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:07:20.558Z"
+    },
+    {
+      "index": 86,
+      "bucket": "llm_trading_developers",
+      "variant": "\"Rust\" trading agent",
+      "query": "\"Rust\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"rust\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:07:34.455Z"
+    },
+    {
+      "index": 87,
+      "bucket": "llm_trading_developers",
+      "variant": "\"LangChain\" trading agent",
+      "query": "\"LangChain\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"langchain\" trading agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:07:53.029Z"
+    },
+    {
+      "index": 88,
+      "bucket": "llm_trading_developers",
+      "variant": "\"OpenAI\" trading agent developer",
+      "query": "\"OpenAI\" trading agent developer lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"openai\" trading agent developer lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:08:09.481Z"
+    },
+    {
+      "index": 89,
+      "bucket": "llm_trading_developers",
+      "variant": "\"agent framework\" quantitative trading",
+      "query": "\"agent framework\" quantitative trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"agent framework\" quantitative trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 5,
+      "completed_at": "2026-09-02T14:08:46.863Z"
+    },
+    {
+      "index": 90,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"AI trading agent\" tried",
+      "query": "\"AI trading agent\" tried lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading agent\" tried lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:19:12.290Z"
+    },
+    {
+      "index": 91,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"AI trading agent\" using",
+      "query": "\"AI trading agent\" using lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading agent\" using lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:19:25.345Z"
+    },
+    {
+      "index": 92,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"AI trading bot\" using",
+      "query": "\"AI trading bot\" using lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading bot\" using lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:19:39.530Z"
+    },
+    {
+      "index": 93,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"best AI trading\" tool",
+      "query": "\"best AI trading\" tool lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"best ai trading\" tool lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 4,
+      "completed_at": "2026-09-02T14:20:11.726Z"
+    },
+    {
+      "index": 94,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"AI trading tools\" recommendation",
+      "query": "\"AI trading tools\" recommendation lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading tools\" recommendation lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 3,
+      "completed_at": "2026-09-02T14:20:44.800Z"
+    },
+    {
+      "index": 95,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"automate my trading\"",
+      "query": "\"automate my trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"automate my trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:20:54.686Z"
+    },
+    {
+      "index": 96,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"automate crypto trading\"",
+      "query": "\"automate crypto trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"automate crypto trading\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 3,
+      "completed_at": "2026-09-02T14:21:28.963Z"
+    },
+    {
+      "index": 97,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"looking for\" \"trading agent\"",
+      "query": "\"looking for\" \"trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"looking for\" \"trading agent\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:21:42.766Z"
+    },
+    {
+      "index": 98,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"need a trading bot\" AI",
+      "query": "\"need a trading bot\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"need a trading bot\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:22:13.588Z"
+    },
+    {
+      "index": 99,
+      "bucket": "explicit_product_user_buyer_intent",
+      "variant": "\"replace my trading bot\"",
+      "query": "\"replace my trading bot\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"replace my trading bot\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:22:41.371Z"
+    },
+    {
+      "index": 100,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"trading infrastructure\" AI",
+      "query": "\"trading infrastructure\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trading infrastructure\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:22:53.891Z"
+    },
+    {
+      "index": 101,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"agent framework\" trading",
+      "query": "\"agent framework\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"agent framework\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:23:06.600Z"
+    },
+    {
+      "index": 102,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"financial data API\" agent",
+      "query": "\"financial data API\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"financial data api\" agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 2,
+      "completed_at": "2026-09-02T14:23:38.308Z"
+    },
+    {
+      "index": 103,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"MCP\" finance agent",
+      "query": "\"MCP\" finance agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"mcp\" finance agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:23:50.609Z"
+    },
+    {
+      "index": 104,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"MCP\" crypto trading",
+      "query": "\"MCP\" crypto trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"mcp\" crypto trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:24:02.569Z"
+    },
+    {
+      "index": 105,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"broker API\" AI agent",
+      "query": "\"broker API\" AI agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"broker api\" ai agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:24:40.386Z"
+    },
+    {
+      "index": 106,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"paper trading\" AI agent",
+      "query": "\"paper trading\" AI agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"paper trading\" ai agent lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:24:55.172Z"
+    },
+    {
+      "index": 107,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"market data API\" AI",
+      "query": "\"market data API\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"market data api\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:25:33.519Z"
+    },
+    {
+      "index": 108,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"trading API\" agent builder",
+      "query": "\"trading API\" agent builder lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trading api\" agent builder lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:26:04.594Z"
+    },
+    {
+      "index": 109,
+      "bucket": "trading_infrastructure_agent_frameworks",
+      "variant": "\"agent OS\" finance",
+      "query": "\"agent OS\" finance lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"agent os\" finance lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:26:17.041Z"
+    },
+    {
+      "index": 110,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"trading bot failed\" AI",
+      "query": "\"trading bot failed\" AI lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trading bot failed\" ai lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:36:51.729Z"
+    },
+    {
+      "index": 111,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"AI trading bot\" disappointing",
+      "query": "\"AI trading bot\" disappointing lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading bot\" disappointing lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "empty",
+      "attempts": 1,
+      "raw_result_count": 0,
+      "completed_at": "2026-09-02T14:37:24.525Z"
+    },
+    {
+      "index": 112,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"trading automation\" problem",
+      "query": "\"trading automation\" problem lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trading automation\" problem lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:38:03.258Z"
+    },
+    {
+      "index": 113,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"backtest\" \"doesn't work\" trading",
+      "query": "\"backtest\" \"doesn't work\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"backtest\" \"doesn't work\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:38:17.361Z"
+    },
+    {
+      "index": 114,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"trading agent\" unreliable",
+      "query": "\"trading agent\" unreliable lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trading agent\" unreliable lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 8,
+      "completed_at": "2026-09-02T14:38:52.192Z"
+    },
+    {
+      "index": 115,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"replace\" \"trading bot\"",
+      "query": "\"replace\" \"trading bot\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"replace\" \"trading bot\" lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:39:05.558Z"
+    },
+    {
+      "index": 116,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"risk management\" \"trading bot\" problem",
+      "query": "\"risk management\" \"trading bot\" problem lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"risk management\" \"trading bot\" problem lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 9,
+      "completed_at": "2026-09-02T14:39:42.418Z"
+    },
+    {
+      "index": 117,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"AI trading\" mistakes",
+      "query": "\"AI trading\" mistakes lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"ai trading\" mistakes lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 10,
+      "completed_at": "2026-09-02T14:39:56.056Z"
+    },
+    {
+      "index": 118,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"trading strategy\" automation pain",
+      "query": "\"trading strategy\" automation pain lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"trading strategy\" automation pain lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 1,
+      "completed_at": "2026-09-02T14:40:28.583Z"
+    },
+    {
+      "index": 119,
+      "bucket": "pain_failed_replacement_intent",
+      "variant": "\"looking for an alternative\" trading",
+      "query": "\"looking for an alternative\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "normalized": "\"looking for an alternative\" trading lang:en since:2026-06-04 -airdrop -giveaway",
+      "status": "completed",
+      "attempts": 1,
+      "raw_result_count": 5,
+      "completed_at": "2026-09-02T14:41:02.834Z"
+    }
+  ],
+  "authors": [
+    {
+      "username": "rohonchain",
+      "index": 0,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 1370
+    },
+    {
+      "username": "gt_protocol",
+      "index": 0,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 4,
+      "engagement": 1127
+    },
+    {
+      "username": "robinhubhb",
+      "index": 1,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 526
+    },
+    {
+      "username": "divyansht91162",
+      "index": 0,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 5,
+      "engagement": 639
+    },
+    {
+      "username": "arc",
+      "index": 4,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 447
+    },
+    {
+      "username": "freecodecamp",
+      "index": 2,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 410
+    },
+    {
+      "username": "cryptopatel",
+      "index": 1,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "qcxint_",
+      "index": 3,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 373
+    },
+    {
+      "username": "huaxiuyaoml",
+      "index": 8,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 371
+    },
+    {
+      "username": "callmeperry3",
+      "index": 11,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 147
+    },
+    {
+      "username": "tryquantio",
+      "index": 5,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 354
+    },
+    {
+      "username": "undefinedki",
+      "index": 11,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 45
+    },
+    {
+      "username": "floki",
+      "index": 12,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 286
+    },
+    {
+      "username": "antpalkin",
+      "index": 9,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 262
+    },
+    {
+      "username": "moondevonyt",
+      "index": 5,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 234
+    },
+    {
+      "username": "btcniumowang",
+      "index": 11,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 210
+    },
+    {
+      "username": "thegemsalert_",
+      "index": 6,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 206
+    },
+    {
+      "username": "gusik4ever",
+      "index": 17,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 202
+    },
+    {
+      "username": "krowncryptocave",
+      "index": 0,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "codewithimanshu",
+      "index": 15,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 170
+    },
+    {
+      "username": "trythreews",
+      "index": 2,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "timmycartel",
+      "index": 17,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 158
+    },
+    {
+      "username": "khing_ladipoe",
+      "index": 10,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 153
+    },
+    {
+      "username": "neil_xbt",
+      "index": 3,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "l2wtrades",
+      "index": 24,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 126
+    },
+    {
+      "username": "milesdeutscher",
+      "index": 20,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 123
+    },
+    {
+      "username": "bleeep_xyz",
+      "index": 26,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 120
+    },
+    {
+      "username": "rahulxbtc",
+      "index": 27,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 115
+    },
+    {
+      "username": "useoccam",
+      "index": 15,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 112
+    },
+    {
+      "username": "thebreadmakerx",
+      "index": 4,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "ritonchain",
+      "index": 30,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 98
+    },
+    {
+      "username": "zkzonk",
+      "index": 31,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 97
+    },
+    {
+      "username": "bitpanda_global",
+      "index": 23,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 95
+    },
+    {
+      "username": "ajah_elube",
+      "index": 14,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 90
+    },
+    {
+      "username": "walrusprotocol",
+      "index": 15,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 90
+    },
+    {
+      "username": "agihouse_org",
+      "index": 5,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "mmenyene_c",
+      "index": 27,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 86
+    },
+    {
+      "username": "xmayeth",
+      "index": 17,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 85
+    },
+    {
+      "username": "schoen_xyz",
+      "index": 29,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 83
+    },
+    {
+      "username": "trozan006",
+      "index": 18,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 83
+    },
+    {
+      "username": "recogard",
+      "index": 40,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 82
+    },
+    {
+      "username": "aionbase_",
+      "index": 19,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 81
+    },
+    {
+      "username": "baglessirl",
+      "index": 32,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 79
+    },
+    {
+      "username": "nofadsec",
+      "index": 33,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 79
+    },
+    {
+      "username": "thedefiangel",
+      "index": 34,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 77
+    },
+    {
+      "username": "reduansheikh11",
+      "index": 6,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "arpon_360",
+      "index": 46,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 74
+    },
+    {
+      "username": "yutongli27",
+      "index": 36,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 74
+    },
+    {
+      "username": "spyzer",
+      "index": 24,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 72
+    },
+    {
+      "username": "danielsamuel_et",
+      "index": 38,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 70
+    },
+    {
+      "username": "dieutinh76044",
+      "index": 39,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 70
+    },
+    {
+      "username": "0xgilllee",
+      "index": 40,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 68
+    },
+    {
+      "username": "smratitiwa86867",
+      "index": 21,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 67
+    },
+    {
+      "username": "etheliaeth",
+      "index": 53,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 66
+    },
+    {
+      "username": "rektmando",
+      "index": 7,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "dansfv",
+      "index": 55,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 65
+    },
+    {
+      "username": "dumbmoneyhunter",
+      "index": 43,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 65
+    },
+    {
+      "username": "ronyz1320",
+      "index": 23,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 65
+    },
+    {
+      "username": "siamkidd",
+      "index": 24,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 65
+    },
+    {
+      "username": "raster_1",
+      "index": 25,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 63
+    },
+    {
+      "username": "0xpinkmoon",
+      "index": 8,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "davidddottech",
+      "index": 61,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 3,
+      "engagement": 60
+    },
+    {
+      "username": "som__008",
+      "index": 48,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 60
+    },
+    {
+      "username": "0xonyedika",
+      "index": 49,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 57
+    },
+    {
+      "username": "di_krass_",
+      "index": 64,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 57
+    },
+    {
+      "username": "wagmi100xx",
+      "index": 9,
+      "enrichment_status": "completed",
+      "attempts": 1,
+      "profile_present": true,
+      "recent_tweet_count": 20
+    },
+    {
+      "username": "dan_linn",
+      "index": 51,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 55
+    },
+    {
+      "username": "divyyanshishrma",
+      "index": 28,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 55
+    },
+    {
+      "username": "eli5defi",
+      "index": 29,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 54
+    },
+    {
+      "username": "fourjjjjt",
+      "index": 30,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 54
+    },
+    {
+      "username": "ox_vanguard",
+      "index": 31,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 54
+    },
+    {
+      "username": "bili_6_",
+      "index": 32,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 53
+    },
+    {
+      "username": "holacreq",
+      "index": 57,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 53
+    },
+    {
+      "username": "xagent_official",
+      "index": 58,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 51
+    },
+    {
+      "username": "leaf_swan",
+      "index": 74,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 50
+    },
+    {
+      "username": "based_elnen",
+      "index": 75,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 47
+    },
+    {
+      "username": "buildwithmuhox",
+      "index": 76,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 47
+    },
+    {
+      "username": "iotraderio",
+      "index": 59,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 47
+    },
+    {
+      "username": "ruujss",
+      "index": 78,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 47
+    },
+    {
+      "username": "thesethian",
+      "index": 33,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 47
+    },
+    {
+      "username": "victorerick001",
+      "index": 10,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 46
+    },
+    {
+      "username": "mizter_ab",
+      "index": 81,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 44
+    },
+    {
+      "username": "navaai",
+      "index": 82,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 44
+    },
+    {
+      "username": "zeroxkyle",
+      "index": 35,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 44
+    },
+    {
+      "username": "cryptocore001",
+      "index": 84,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 43
+    },
+    {
+      "username": "cryptolab06",
+      "index": 85,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 43
+    },
+    {
+      "username": "davidbaseeth",
+      "index": 36,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 43
+    },
+    {
+      "username": "lil_louiet",
+      "index": 41,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 43
+    },
+    {
+      "username": "prinz_land",
+      "index": 65,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 43
+    },
+    {
+      "username": "kimiaprotocol",
+      "index": 37,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 42
+    },
+    {
+      "username": "jepslife",
+      "index": 38,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 40
+    },
+    {
+      "username": "lekimxbt",
+      "index": 68,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 40
+    },
+    {
+      "username": "roniejet",
+      "index": 39,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 40
+    },
+    {
+      "username": "truflation",
+      "index": 40,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 40
+    },
+    {
+      "username": "daievolutionhub",
+      "index": 41,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 39
+    },
+    {
+      "username": "rcom1337",
+      "index": 42,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 39
+    },
+    {
+      "username": "dirkbartz",
+      "index": 43,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 3,
+      "engagement": 38
+    },
+    {
+      "username": "issatheblows",
+      "index": 44,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 38
+    },
+    {
+      "username": "robinodexyz",
+      "index": 12,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 38
+    },
+    {
+      "username": "bitmantw",
+      "index": 76,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 37
+    },
+    {
+      "username": "capygen",
+      "index": 100,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 37
+    },
+    {
+      "username": "legend_1000x",
+      "index": 101,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 37
+    },
+    {
+      "username": "amrit_mirch",
+      "index": 46,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 36
+    },
+    {
+      "username": "vlad_web3",
+      "index": 103,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 36
+    },
+    {
+      "username": "yemigraffix",
+      "index": 104,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 36
+    },
+    {
+      "username": "0x7_anderson",
+      "index": 47,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 35
+    },
+    {
+      "username": "great_ikay",
+      "index": 13,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 35
+    },
+    {
+      "username": "kimidyor",
+      "index": 80,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 34
+    },
+    {
+      "username": "cloudbank_to",
+      "index": 81,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 33
+    },
+    {
+      "username": "real_jb_1",
+      "index": 49,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 33
+    },
+    {
+      "username": "shizzyunchained",
+      "index": 55,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 33
+    },
+    {
+      "username": "jaydeezy1413",
+      "index": 14,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 32
+    },
+    {
+      "username": "satonchain",
+      "index": 112,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 32
+    },
+    {
+      "username": "thewardenagent",
+      "index": 51,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 32
+    },
+    {
+      "username": "abdulkarim2",
+      "index": 35,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 8
+    },
+    {
+      "username": "dankornas",
+      "index": 113,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 10
+    },
+    {
+      "username": "rahmonhammed7",
+      "index": 15,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 31
+    },
+    {
+      "username": "watchingmarkets",
+      "index": 16,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 31
+    },
+    {
+      "username": "official_bles1",
+      "index": 55,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 30
+    },
+    {
+      "username": "injectivenow",
+      "index": 56,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 29
+    },
+    {
+      "username": "sairahul1",
+      "index": 120,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 29
+    },
+    {
+      "username": "shiftercrypto",
+      "index": 17,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 29
+    },
+    {
+      "username": "chubsters0x",
+      "index": 58,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 28
+    },
+    {
+      "username": "convik_ai",
+      "index": 18,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 28
+    },
+    {
+      "username": "chandus279",
+      "index": 60,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 27
+    },
+    {
+      "username": "genrih99999",
+      "index": 125,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 27
+    },
+    {
+      "username": "hoodinsider_",
+      "index": 19,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 27
+    },
+    {
+      "username": "stevethehead_",
+      "index": 20,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 27
+    },
+    {
+      "username": "dv_sol1",
+      "index": 128,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 26
+    },
+    {
+      "username": "milkroaddaily",
+      "index": 21,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 26
+    },
+    {
+      "username": "miriyamah",
+      "index": 22,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 26
+    },
+    {
+      "username": "degen_jess",
+      "index": 65,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 25
+    },
+    {
+      "username": "dimaholovatyi",
+      "index": 66,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 25
+    },
+    {
+      "username": "mikelongterm",
+      "index": 67,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 25
+    },
+    {
+      "username": "murtala_faizah",
+      "index": 68,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 25
+    },
+    {
+      "username": "scematica",
+      "index": 69,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 25
+    },
+    {
+      "username": "wedrick126807",
+      "index": 105,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 25
+    },
+    {
+      "username": "zig100x",
+      "index": 23,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 25
+    },
+    {
+      "username": "deepseektetra",
+      "index": 71,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 24
+    },
+    {
+      "username": "gordanramsay521",
+      "index": 72,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 24
+    },
+    {
+      "username": "rashid_hamza_",
+      "index": 24,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 24
+    },
+    {
+      "username": "investnorthwise",
+      "index": 25,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 23
+    },
+    {
+      "username": "jrtdesk",
+      "index": 81,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 23
+    },
+    {
+      "username": "lukeprotocol",
+      "index": 112,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 23
+    },
+    {
+      "username": "george_foc",
+      "index": 113,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 22
+    },
+    {
+      "username": "luxalgo",
+      "index": 82,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 2,
+      "engagement": 22
+    },
+    {
+      "username": "0x_zeeme",
+      "index": 146,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 21
+    },
+    {
+      "username": "eminweb3",
+      "index": 93,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 4,
+      "engagement": 16
+    },
+    {
+      "username": "eveynft",
+      "index": 148,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 21
+    },
+    {
+      "username": "nykdotdev",
+      "index": 38,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 7
+    },
+    {
+      "username": "premierbase",
+      "index": 150,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 21
+    },
+    {
+      "username": "vvveity",
+      "index": 76,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 21
+    },
+    {
+      "username": "ac_trades",
+      "index": 152,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 19
+    },
+    {
+      "username": "fastxtrades",
+      "index": 117,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 19
+    },
+    {
+      "username": "marketcallshq",
+      "index": 77,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 19
+    },
+    {
+      "username": "soundofdragon",
+      "index": 155,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 19
+    },
+    {
+      "username": "triforcetrader",
+      "index": 78,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 19
+    },
+    {
+      "username": "winggirltrader",
+      "index": 115,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 10
+    },
+    {
+      "username": "baagus_zip",
+      "index": 120,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 18
+    },
+    {
+      "username": "darthfib",
+      "index": 121,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 18
+    },
+    {
+      "username": "jobiraw0",
+      "index": 122,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 3,
+      "engagement": 18
+    },
+    {
+      "username": "singour_neeraj",
+      "index": 161,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 18
+    },
+    {
+      "username": "vectorizeio",
+      "index": 79,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 18
+    },
+    {
+      "username": "bollish",
+      "index": 80,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 17
+    },
+    {
+      "username": "cripdoecrypto",
+      "index": 81,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 17
+    },
+    {
+      "username": "hapiprints",
+      "index": 26,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 17
+    },
+    {
+      "username": "iamkingdammy",
+      "index": 166,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 17
+    },
+    {
+      "username": "j_caldwell21",
+      "index": 167,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 17
+    },
+    {
+      "username": "lordstoppington",
+      "index": 119,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 9
+    },
+    {
+      "username": "motier_crypto",
+      "index": 41,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 6
+    },
+    {
+      "username": "assunzio_real",
+      "index": 128,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "backquant",
+      "index": 83,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "bondy_inx",
+      "index": 27,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "crake_y",
+      "index": 173,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "freemoneygl",
+      "index": 28,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "jamine_nft",
+      "index": 133,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "korinek_trades",
+      "index": 176,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "roaiscalper",
+      "index": 134,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "starkwareltd",
+      "index": 86,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "vola2vola",
+      "index": 136,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 16
+    },
+    {
+      "username": "alphaseeker21",
+      "index": 29,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 15
+    },
+    {
+      "username": "leon1skum",
+      "index": 181,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 15
+    },
+    {
+      "username": "vergex_ai",
+      "index": 182,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 15
+    },
+    {
+      "username": "_picokel",
+      "index": 138,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 14
+    },
+    {
+      "username": "0xyuzuu",
+      "index": 88,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 14
+    },
+    {
+      "username": "immt_io",
+      "index": 30,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 14
+    },
+    {
+      "username": "layerkenzy",
+      "index": 90,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 14
+    },
+    {
+      "username": "professor34__",
+      "index": 142,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 14
+    },
+    {
+      "username": "tradingprotocol",
+      "index": 188,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 14
+    },
+    {
+      "username": "zoofwallet",
+      "index": 100,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 14
+    },
+    {
+      "username": "agentarcade",
+      "index": 101,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "arnav_vohra",
+      "index": 91,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "bon_defi",
+      "index": 192,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "cfm_sol",
+      "index": 92,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "dichen001",
+      "index": 104,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "divaagurlxw",
+      "index": 93,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "hbg0642",
+      "index": 149,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "projectrewire_",
+      "index": 94,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 13
+    },
+    {
+      "username": "astrodevil_",
+      "index": 95,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 12
+    },
+    {
+      "username": "cryptoexpert101",
+      "index": 96,
+      "enrichment_status": "pending",
+      "attempts": 0,
+      "search_tweet_count": 1,
+      "engagement": 12
+    }
+  ],
+  "last_completed_query_index": 119,
+  "last_completed_enrichment_index": 9,
+  "counts": {
+    "raw_tweets_returned": 642,
+    "raw_tweets_stored": 573,
+    "unique_authors": 493,
+    "profiles_stored": 10,
+    "recent_tweets_stored": 200,
+    "search_calls_completed": 120,
+    "enrichments_completed": 10
+  },
+  "stop": {
+    "status": "not_stopped",
+    "reason": null,
+    "at": null
+  },
+  "actions_performed": []
+}
