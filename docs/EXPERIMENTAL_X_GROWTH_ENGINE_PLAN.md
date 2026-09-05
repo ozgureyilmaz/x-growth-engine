@@ -94,7 +94,7 @@ V1 is operated manually on the Mac with `npm run daily -- doctor --live-read`,
 EXPERIMENTAL_LIVE_READ --max-drafts 5`. V2 is invoked explicitly with
 `npm run daily -- auto --config config/daily-v2.json --max-actions 5`; Hermes
 only owns the external clock and must not rewrite or invent action bodies.
-Automatic dry-run, fake-MCP writer tests, read-back tests, lock/recovery tests,
+Automatic dry-run, fake-Hermes receipt tests, request binding tests, lock/recovery tests,
 and partial-failure tests must pass before adding the Hermes cron command.
 
 Primary metric: founder publishability approval rate = founder-approved drafts / reviewed drafts; source of truth: exact-hash founder-review import; cohort/window: one daily run and its weekly aggregate; evidence status: proposed.

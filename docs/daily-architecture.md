@@ -23,6 +23,6 @@ flowchart LR
 
 System 1 owns bounded XActions reads and durable evidence. System 2 owns all
 analysis, policy decisions, and V2 publication requests. Codex model workers
-have no MCP tools and no publisher credentials; the separate writer owns only
-the three configured write tools. V1 ends at founder review, while V2 requires
+have no MCP tools and no publisher credentials; Hermes owns the three configured
+publication actions through its browser publisher skill. V1 ends at founder review, while V2 requires
 the explicit `auto` command and separate automatic configuration.
