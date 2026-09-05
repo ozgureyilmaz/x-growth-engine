@@ -24,6 +24,32 @@ export function buildDailyQueries(queryConfig,now,count,lookbackHours=48) {
 }
 const schemaByStage={opportunity:OpportunityAnalysisSchema,generation:DraftGenerationSchema,evaluation:EvaluationBatchSchema};
 
+function compactPost(value) {
+  if (!value || typeof value !== 'object') return value;
+  return {
+    provider_id:value.provider_id, url:value.url, username:value.username,
+    text:String(value.text ?? '').slice(0,1200), timestamp:value.timestamp,
+    likes:value.likes, reposts:value.reposts, replies:value.replies,
+  };
+}
+
+export function compactContext(context) {
+  return {
+    post:compactPost(context?.post),
+    account:context?.account ? {
+      username:context.account.username, name:String(context.account.name ?? '').slice(0,200),
+      bio:String(context.account.bio ?? '').slice(0,800), website:context.account.website,
+      followers:context.account.followers, following:context.account.following,
+    } : null,
+    timeline:(Array.isArray(context?.timeline)?context.timeline:[]).slice(0,5).map(compactPost),
+    replies:(Array.isArray(context?.replies)?context.replies:[]).slice(0,5).map(compactPost),
+    thread:{completeness:context?.thread?.completeness ?? 'unknown',raw:String(context?.thread?.raw ?? '').slice(0,8000)},
+    context_errors:Array.isArray(context?.context_errors)?context.context_errors:[],
+    completeness:context?.completeness ?? 'unknown', source_mode:context?.source_mode,
+    context_hash:context?.context_hash,
+  };
+}
+
 export function validateStage(stage,value,contexts,config,drafts=[],facts=[]) {
   const parsed=schemaByStage[stage].parse(value);
   const indices=new Set();
@@ -184,7 +210,7 @@ export async function executeDaily(options={}) {
             }catch(e){const code=errorCode(e);await store.saveEvent(runId,'X_MODEL_FINISHED',{stage:name,call:calls,status:'FAILED',code},`${runId}:model:${calls}:done`);if(attempt===2||['INTERRUPTED','RUN_TIMEOUT','MODEL_LIMIT_STOPPED','AUTH_REQUIRED','CODEX_EXEC_FAILED','CODEX_BINARY_MISSING'].includes(code))throw e;await delay(1000,signal);}
           }
         });
-        const input={contexts,approved_facts:facts};
+        const input={contexts:contexts.map(compactContext),approved_facts:facts};
         const analysis=await stage('opportunity',input,'Array<{context_index, opportunity_score, confidence, recommended_action_type, reason}>');
         const eligible=analysis.filter(a=>a.opportunity_score>=config.discovery.min_opportunity_score&&a.confidence>=.7);
         if(eligible.length){

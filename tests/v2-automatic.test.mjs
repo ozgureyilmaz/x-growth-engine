@@ -9,7 +9,7 @@ import { buildAutoPublicationRequest, verifyAutoReceipt } from '../scripts/daily
 import { evaluatePublicationPolicy } from '../scripts/daily-policy.mjs';
 import { buildDraft } from '../scripts/daily-intelligence.mjs';
 import { DailyStore, withRunLock } from '../scripts/daily-store.mjs';
-import { executeDaily, main } from '../scripts/run-daily.mjs';
+import { compactContext, executeDaily, main } from '../scripts/run-daily.mjs';
 import { XActionsMcpPublisher } from '../scripts/daily-publisher.mjs';
 import { normalizePost, sha256 } from '../scripts/daily-contracts.mjs';
 
@@ -237,4 +237,13 @@ test('automatic control preflight retries a transient empty result', async (t) =
   const result = await executeDaily({ config, mode: 'EXPERIMENTAL_LIVE_AUTO', source, dryRun: true, maxActions: 0, runId: 'control_retry_run', now: new Date('2026-09-05T10:00:00.000Z'), queryConfig: { language: 'en', buckets: { bucket: ['"AI trading agent"'] } } });
   assert.equal(result.status, 'DISCOVERY_COMPLETE');
   assert.equal(calls, 2);
+});
+
+test('model context compaction bounds repeated timeline, replies, and thread payloads', () => {
+  const context = { post: { provider_id: '1', text: 'post' }, account: { bio: 'bio' }, timeline: Array.from({ length: 20 }, (_, index) => ({ text: `timeline-${index}-${'x'.repeat(1000)}` })), replies: Array.from({ length: 20 }, (_, index) => ({ text: `reply-${index}-${'y'.repeat(1000)}` })), thread: { raw: 'z'.repeat(32000), completeness: 'sampled' }, context_errors: [], completeness: 'sampled', source_mode: 'EXPERIMENTAL_LIVE_AUTO' };
+  const compact = compactContext(context);
+  assert.equal(compact.timeline.length, 5);
+  assert.equal(compact.replies.length, 5);
+  assert.ok(compact.thread.raw.length <= 8000);
+  assert.ok(JSON.stringify(compact).length < 30000);
 });
