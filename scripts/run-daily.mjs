@@ -8,7 +8,7 @@ import { XActionsMcpSource, FixtureXSource } from './daily-source.mjs';
 import { DailyStore, withRunLock } from './daily-store.mjs';
 import { buildDraft, normalizeCandidate, scoreOpportunity, makeNoAction } from './daily-intelligence.mjs';
 import { runStage } from './daily-codex.mjs';
-import { ROOT,ConfigSchema,loadConfig,loadJson,resolvePath,approvedFacts,throwIfAborted,delay,errorCode,atomicJson } from './daily-runtime.mjs';
+import { ROOT,ConfigSchema,loadConfig,loadJson,resolvePath,approvedFacts,throwIfAborted,delay,errorCode,atomicJson,hermesCommand } from './daily-runtime.mjs';
 import { evaluatePublicationPolicy } from './daily-policy.mjs';
 import { AutoPublicationReceiptSchema, buildAutoPublicationRequest, verifyAutoReceipt } from './daily-publication-contracts.mjs';
 import { HermesXPublisher } from './hermes-x-publisher.mjs';
@@ -260,7 +260,7 @@ export async function executeDaily(options={}) {
       if(autoMode&&selected.length){
         const grant={grant_id:`grant_${runId}`,publisher_account:'nullquanty',expires_at:new Date(now.getTime()+config.intelligence.run_timeout_ms).toISOString(),max_actions:maxDrafts};
         const priorActions=await store.publicationHistory();
-        if(!options.dryRun)publisher=options.publisher||new HermesXPublisher({hermesCommand:process.env.HERMES_BIN||'hermes',model:'gpt-5.6-luna',reasoningEffort:'xhigh',timeoutMs:config.publisher.action_timeout_ms,cwd:ROOT});
+        if(!options.dryRun)publisher=options.publisher||new HermesXPublisher({hermesCommand:hermesCommand(),model:'gpt-5.6-luna',reasoningEffort:'xhigh',timeoutMs:config.publisher.action_timeout_ms,cwd:ROOT});
         try{
           for(const draft of selected){
             throwIfAborted(signal);

@@ -1,4 +1,5 @@
 import { access, readFile, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { DailyStore, withRunLock } from './daily-store.mjs';
@@ -10,6 +11,7 @@ const CONFIG_PATH = path.join(ROOT, 'config/daily-experiment.json');
 async function loadJson(file) { return JSON.parse(await readFile(file, 'utf8')); }
 function resolvePath(value) { return path.isAbsolute(value) ? value : path.join(ROOT, value); }
 function commandPresent(command, args = ['--version']) { const result = spawnSync(command, args, { encoding: 'utf8', timeout: 10000 }); return !result.error && result.status === 0; }
+function hermesCommand() { return process.env.HERMES_BIN || (existsSync('/Users/0x79de/.local/bin/hermes') ? '/Users/0x79de/.local/bin/hermes' : 'hermes'); }
 function keychainPresent(service) { const account = String(spawnSync('/usr/bin/id', ['-un'], { encoding: 'utf8' }).stdout ?? '').trim(); if (!account) return false; const result = spawnSync('/usr/bin/security', ['find-generic-password', '-a', account, '-s', service], { encoding: 'utf8', timeout: 10000 }); return result.status === 0; }
 
 async function lockState(root) {
@@ -41,7 +43,7 @@ export async function doctor(options = {}) {
     try { checks.live_read_preflight = await source.preflight(`the lang:en since:${new Date(Date.now() - config.discovery.lookback_hours * 3600000).toISOString().slice(0, 10)}`); } catch (error) { checks.live_read_preflight = { status: 'failed', error: error instanceof Error ? error.message : String(error) }; } finally { await source.close().catch(() => undefined); }
   }
   if (options.auto) {
-    checks.hermes_binary=commandPresent(process.env.HERMES_BIN||'hermes',['--help']);
+    checks.hermes_binary=commandPresent(hermesCommand(),['--help']);
     checks.hermes_skill=await access(path.join(ROOT,'hermes/skills/x-growth-publisher/SKILL.md')).then(()=>true).catch(()=>false);
     checks.hermes_model='gpt-5.6-luna'; checks.hermes_reasoning_effort='xhigh';
     checks.publisher_preflight=checks.hermes_binary&&checks.hermes_skill?{status:'passed',transport:'hermes_cli',model:checks.hermes_model,reasoning_effort:checks.hermes_reasoning_effort,skill:'x-growth-publisher'}:{status:'failed',error:checks.hermes_binary?'HERMES_SKILL_MISSING':'HERMES_BINARY_MISSING'};

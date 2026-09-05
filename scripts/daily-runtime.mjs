@@ -1,4 +1,5 @@
 import { readFile, writeFile, rename, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { z } from 'zod';
@@ -8,6 +9,9 @@ export const ROOT = fileURLToPath(new URL('../', import.meta.url));
 export const resolvePath = value => path.resolve(ROOT,value);
 export const loadJson = async file => JSON.parse(await readFile(file,'utf8'));
 export const READ_TOOLS = ['x_search_tweets','x_get_profile','x_get_tweets','x_get_thread','x_get_replies','x_get_quote_tweets'];
+export function hermesCommand() {
+  return process.env.HERMES_BIN || (existsSync('/Users/0x79de/.local/bin/hermes') ? '/Users/0x79de/.local/bin/hermes' : 'hermes');
+}
 const count = z.number().int().positive();
 const score = z.number().min(0).max(1);
 export const ConfigSchema = z.object({
