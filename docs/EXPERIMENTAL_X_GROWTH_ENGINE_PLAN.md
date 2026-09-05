@@ -57,6 +57,11 @@ preflight + kill switch
   sequential execution, 120-second task timeout, 60-second source-call timeout,
   and 30-minute total run timeout.
 
+V2 widens the ranking pool to 20 enriched accounts, 12 contexts, and 12
+opportunity records while retaining the five-action publication cap. A single
+bounded regeneration/evaluation pass is available when the evaluator returns
+`REGENERATE`.
+
 ## Content contract
 
 Supported V1 actions are `POST_DRAFT`, `REPLY_DRAFT`, `QUOTE_DRAFT`, and

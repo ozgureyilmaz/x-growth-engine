@@ -13,3 +13,9 @@ invented experience, predictions or returns promises, generic promotion, repetit
 hooks, repeated distinctive phrases, and redundant contribution. Review prior_bodies
 for semantic repetition, not merely exact copying. Sampled or post-only context
 does not establish no prior replies or consensus. Prefer NO_ACTION to weak promotion.
+
+Score spam_risk for actual promotional behavior (CTAs, hype, unsolicited offers,
+or repeated outreach), not merely because a draft mentions Marx once or is a
+reply. Score repetition_risk for semantic overlap with prior_bodies and other
+drafts. A concrete, contextual contribution with one approved Marx bridge should
+remain low-risk when it contains no CTA, link, hashtag, or promise.

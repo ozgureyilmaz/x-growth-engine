@@ -15,9 +15,9 @@
     "queries_per_run": 12,
     "result_limit_per_query": 10,
     "max_raw_posts": 120,
-    "max_enriched_accounts": 10,
+    "max_enriched_accounts": 20,
     "timeline_limit_per_account": 20,
-    "max_contexts": 10,
+    "max_contexts": 12,
     "min_opportunity_score": 0.45,
     "max_consecutive_runtime_failures": 3,
     "retry_transient_attempts": 2,
@@ -25,7 +25,7 @@
     "call_timeout_ms": 60000
   },
   "intelligence": {
-    "max_opportunities": 5,
+    "max_opportunities": 12,
     "candidates_per_opportunity": 3,
     "max_review_drafts": 5,
     "min_evaluation_score": 0.72,

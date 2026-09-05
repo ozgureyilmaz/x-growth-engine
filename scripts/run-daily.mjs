@@ -199,7 +199,7 @@ export async function executeDaily(options={}) {
         generated=contexts.map((c,i)=>({context_index:i,action_type:'REPLY_DRAFT',body:'For the trading agent, make failed fills explicit. Marx is a place to discuss market analysis with other agents.',strategy_family:config.content.strategies[0],hook_family:'specific_context',fact_ids:[],evaluation:{context_fit:.9,usefulness:.9,naturalness:.85,marx_relevance:.85,spam_risk:.02,repetition_risk:.02,unsupported_claim_risk:.02,decision:'PUBLISHABLE'}}));
       }else if(contexts.length){
         const modelConfig={...config.codex,timeout_ms:config.intelligence.timeout_ms,cwd:ROOT};
-        const stage=async(name,input,expected,drafts=[])=>step(`model:${MODEL_INPUT_VERSION}:${name}`,{input,prompt:await readFile(resolvePath(`prompts/daily/${name}-v2.md`),'utf8')},async()=>{
+        const stage=async(name,input,expected,drafts=[],suffix='')=>step(`model:${MODEL_INPUT_VERSION}:${name}${suffix?`:${suffix}`:''}`,{input,prompt:await readFile(resolvePath(`prompts/daily/${name}-v2.md`),'utf8')},async()=>{
           const prompt=await readFile(resolvePath(`prompts/daily/${name}-v2.md`),'utf8');
           for(let attempt=1;attempt<=2;attempt++){
             throwIfAborted(signal);if(calls>=config.intelligence.max_codex_calls)throw new Error('MODEL_LIMIT_STOPPED');calls++;
@@ -220,6 +220,14 @@ export async function executeDaily(options={}) {
           if(candidates.length){
             const evaluated=await stage('evaluation',{...input,drafts:candidates.map((c,i)=>({draft_index:i,context_index:c.context_index,body:c.body,action_type:c.action_type,fact_ids:c.fact_ids})),prior_bodies:prior.slice(-50)},'Array<{draft_index, scores:{context_fit,usefulness,naturalness,marx_relevance,spam_risk,repetition_risk,unsupported_claim_risk},decision,reasons}>',candidates);
             generated=candidates.map((c,i)=>({...c,evaluation:evaluated.find(e=>e.draft_index===i)}));
+            const regenerationFeedback=evaluated.filter(e=>e.decision==='REGENERATE').map(e=>({draft_index:e.draft_index,reasons:e.reasons,scores:e.scores}));
+            if(regenerationFeedback.length&&calls+2<=config.intelligence.max_codex_calls){
+              const regenerated=await stage('generation',{...input,opportunities:eligible,strategies:config.content.strategies,candidates_per_opportunity:config.intelligence.candidates_per_opportunity,prior_bodies:[...prior,...candidates.map(c=>c.body)],regeneration_feedback:regenerationFeedback},'Array<{context_index, action_type, body, strategy_family, hook_family, fact_ids}>',[],'retry1');
+              if(regenerated.length){
+                const retryEvaluated=await stage('evaluation',{...input,drafts:regenerated.map((c,i)=>({draft_index:i,context_index:c.context_index,body:c.body,action_type:c.action_type,fact_ids:c.fact_ids})),prior_bodies:[...prior,...candidates.map(c=>c.body)],regeneration_feedback:regenerationFeedback},'Array<{draft_index, scores:{context_fit,usefulness,naturalness,marx_relevance,spam_risk,repetition_risk,unsupported_claim_risk},decision,reasons}>',regenerated,'retry1');
+                generated=regenerated.map((c,i)=>({...c,evaluation:retryEvaluated.find(e=>e.draft_index===i)}));
+              }
+            }
           }
         }
       }

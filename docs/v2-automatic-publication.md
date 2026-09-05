@@ -56,6 +56,11 @@ The run performs discovery, context enrichment, Codex opportunity analysis,
 strategy-diverse generation, independent evaluation, deterministic QA, the
 publication policy gate, write, read-back, and receipt persistence.
 
+V2 ranks up to 12 contexts from up to 20 enriched accounts and 12 opportunity
+records, while the final publication cap remains five actions per run. If the
+independent evaluator returns `REGENERATE`, one bounded repair generation and
+evaluation pass is attempted before the policy gate makes the final decision.
+
 Replies and thread reads are optional context enrichments. A known runtime or
 timeout failure on either helper is recorded as partial context and the run
 continues; authentication, challenge, and rate-limit failures remain fatal.

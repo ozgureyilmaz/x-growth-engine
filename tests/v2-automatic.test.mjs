@@ -204,6 +204,26 @@ test('automatic pipeline continues after a bounded publication failure', async (
   assert.equal(result.publication.failed, 1);
 });
 
+test('automatic pipeline regenerates evaluator-rejected drafts once before publishing', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'xge-v2-auto-regenerate-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const config = autoConfig(root);
+  const factBase = { fact_id: 'marx-agent-first-finance-platform', claim: 'Marx presents itself as an agent-first financial platform.', source_url: 'https://marx.finance/docs', prohibited_extrapolations: ['returns'] };
+  await writeFile(path.join(root, 'facts.json'), JSON.stringify({ schema_version: '1.0', facts: [{ ...factBase, status: 'APPROVED', approved_by: 'ozgur', approved_at: '2026-09-01T00:00:00.000Z', expires_at: '2026-10-01T00:00:00.000Z', claim_hash: sha256(factBase) }] }));
+  config.facts_path = path.join(root, 'facts.json');
+  const now = new Date('2026-09-05T10:00:00.000Z');
+  const post = normalizePost({ id: '1001', username: 'builder', text: 'Building an AI trading agent', timestamp: '2026-09-05T09:00:00.000Z', url: 'https://x.com/builder/status/1001', likes: 8, retweets: 2, replies: 1 }, 'q', 'bucket', now.toISOString());
+  const source = { preflight: async () => ({ status: 'passed', result_count: 1 }), search: async () => [post], profile: async () => undefined, timeline: async () => [], replies: async () => [], thread: async () => ({ raw: null, completeness: 'unknown', retrieved_at: now.toISOString() }), close: async () => {} };
+  const rejected = 'This repeats a promotional bridge for the trading agent. Marx is useful.';
+  const repaired = 'For this trading agent, preserve rejected fills in the event log. Marx can make the assumptions inspectable.';
+  let evaluationCalls = 0;
+  const publisher = { publishAndVerify: async () => ({ status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' }), close: async () => {} };
+  const result = await executeDaily({ config, mode: 'EXPERIMENTAL_LIVE_AUTO', source, publisher, maxActions: 1, runId: 'auto_regenerate_run', now, queryConfig: { language: 'en', buckets: { bucket: ['"AI trading agent"'] } }, modelRunner: async (stage) => stage === 'opportunity' ? [{ context_index: 0, opportunity_score: 0.9, confidence: 0.9, recommended_action_type: 'REPLY_DRAFT', reason: 'specific builder problem' }] : stage === 'generation' ? [{ context_index: 0, action_type: 'REPLY_DRAFT', body: evaluationCalls === 0 ? rejected : repaired, strategy_family: 'EVIDENCE_AND_PROVENANCE', hook_family: 'specific_context', fact_ids: ['marx-agent-first-finance-platform'] }] : (++evaluationCalls === 1 ? [{ draft_index: 0, scores: { context_fit: 0.9, usefulness: 0.8, naturalness: 0.8, marx_relevance: 0.9, spam_risk: 0.3, repetition_risk: 0.8, unsupported_claim_risk: 0.2 }, decision: 'REGENERATE', reasons: ['repetition and promotional risk'] }] : [{ draft_index: 0, scores: { context_fit: 0.9, usefulness: 0.9, naturalness: 0.9, marx_relevance: 0.9, spam_risk: 0.01, repetition_risk: 0.01, unsupported_claim_risk: 0.01 }, decision: 'PUBLISHABLE', reasons: ['repaired'] }] ) });
+  assert.equal(result.status, 'AUTO_PUBLISHED');
+  assert.equal(result.publication.published, 1);
+  assert.equal(result.model_calls, 5);
+});
+
 test('publication receipt replay is idempotent and conflicting receipt is rejected', async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'xge-v2-receipt-replay-'));
   t.after(() => rm(root, { recursive: true, force: true }));
