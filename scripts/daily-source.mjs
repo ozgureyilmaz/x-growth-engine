@@ -11,7 +11,7 @@ export function decodeToolResult(result) {
   return value;
 }
 export function arrayResult(value) {
-  for(const v of [value,value?.data,value?.tweets,value?.results,value?.replies,value?.data?.tweets,value?.data?.replies]) if(Array.isArray(v))return v;
+  for(const v of [value,value?.data,value?.tweets,value?.results,value?.replies,value?.quotes,value?.data?.tweets,value?.data?.replies,value?.data?.quotes]) if(Array.isArray(v))return v;
   throw new Error('MALFORMED_SOURCE_ARRAY');
 }
 export class XActionsMcpSource {

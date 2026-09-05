@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Bounded, read-only X research pipeline for Marx prospect discovery",
+  "description": "Bounded X research, draft intelligence, and policy-gated automatic publication for Marx prospect discovery",
   "scripts": {
     "daily": "node scripts/run-daily.mjs",
     "review": "node scripts/review.mjs",

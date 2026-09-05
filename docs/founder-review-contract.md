@@ -31,4 +31,5 @@ Allowed decisions are `APPROVED`, `NEEDS_REVISION`, `REJECTED_GENERIC`,
 `REJECTED_PROMOTIONAL`, `REJECTED_IRRELEVANT`, `REJECTED_UNSUPPORTED`, and
 `REJECTED_VOICE`. A stale, forged, or unknown action hash is rejected. Importing
 a founder approval does not publish anything in V1 and does not enable the
-dormant V2 publisher.
+different V2 automatic publisher. V2 uses its own policy authorization and is
+invoked only by the explicit `auto` command.

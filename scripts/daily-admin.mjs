@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { DailyStore, withRunLock } from './daily-store.mjs';
 import { XActionsMcpSource } from './daily-source.mjs';
+import { XActionsMcpPublisher } from './daily-publisher.mjs';
 
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
 const CONFIG_PATH = path.join(ROOT, 'config/daily-experiment.json');
@@ -31,6 +32,7 @@ export async function doctor(options = {}) {
     xactions_csrf_token_present: keychainPresent('xactions-csrf-token'),
     approved_marx_facts: Array.isArray(facts.facts) ? facts.facts.filter((fact) => fact.status === 'APPROVED').length : 0,
     publisher_disabled: config.publisher.enabled === false && config.publisher.mode === 'MANUAL_ONLY' && config.publisher.kill_switch === true,
+    publisher_active: config.publisher.enabled === true && config.publisher.mode === 'AUTOMATIC' && config.publisher.kill_switch === false,
     lock: await lockState(root),
   };
   checks.lock_healthy = !checks.lock.present || checks.lock.alive;
@@ -39,8 +41,13 @@ export async function doctor(options = {}) {
     const source = new XActionsMcpSource({ command: process.env.XGE_XACTIONS_MCP_COMMAND ?? config.source.command, args: config.source.args, platform: config.source.platform, readTools: config.source.read_tools, callTimeoutMs: config.discovery.call_timeout_ms });
     try { checks.live_read_preflight = await source.preflight(`the lang:en since:${new Date(Date.now() - config.discovery.lookback_hours * 3600000).toISOString().slice(0, 10)}`); } catch (error) { checks.live_read_preflight = { status: 'failed', error: error instanceof Error ? error.message : String(error) }; } finally { await source.close().catch(() => undefined); }
   }
-  const required = ['sqlite3', 'codex', 'codex_login', 'xactions_wrapper', 'publisher_disabled', 'lock_healthy', 'facts_ready'];
-  const ok = required.every((key) => checks[key] === true) && (!options.liveRead || checks.live_read_preflight?.status === 'passed');
+  if (options.auto) {
+    const publisher = new XActionsMcpPublisher({ command: process.env.XGE_XACTIONS_MCP_COMMAND ?? config.source.command, args: config.source.args, readbackTools: [...new Set([...config.source.read_tools, 'x_get_quote_tweets'])], writeTools: config.publisher.write_tools, callTimeoutMs: config.publisher.action_timeout_ms });
+    try { await publisher.connect(); checks.publisher_preflight = { status: 'passed', write_tools: Object.values(config.publisher.write_tools), readback_tools: [...new Set([...config.source.read_tools, 'x_get_quote_tweets'])] }; } catch (error) { checks.publisher_preflight = { status: 'failed', error: error instanceof Error ? error.message : String(error) }; } finally { await publisher.close().catch(() => undefined); }
+  }
+  const required = ['sqlite3', 'codex', 'codex_login', 'xactions_wrapper', 'lock_healthy', 'facts_ready'];
+  if (options.auto) required.push('publisher_active'); else required.push('publisher_disabled');
+  const ok = required.every((key) => checks[key] === true) && (!options.liveRead || checks.live_read_preflight?.status === 'passed') && (!options.auto || checks.publisher_preflight?.status === 'passed');
   return { status: ok ? 'PASS' : 'DEGRADED', checks, next: ok ? 'ready_for_selected_run_mode' : 'resolve_failed_checks_before_live_run' };
 }
 
@@ -52,7 +59,7 @@ export async function recover(runId, options = {}) {
   if (lock.present && lock.alive) throw new Error(`DAILY_RUN_LOCKED_BY_LIVE_PID:${lock.pid}`);
   if (lock.present) await rm(path.join(root, '.daily-run.lock'), { recursive: true, force: true });
   const store = new DailyStore(resolvePath(config.storage.database), resolvePath(config.storage.events));
-  await withRunLock(root, async () => store.markInterrupted(runId, 'OWNER_NOT_ALIVE'));
+  await withRunLock(root, async () => { await store.markInterrupted(runId, 'OWNER_NOT_ALIVE'); await store.markClaimedForReconciliation(runId); });
   return { status: 'recovered', run_id: runId, previous_lock: lock, new_state: 'INTERRUPTED' };
 }
 

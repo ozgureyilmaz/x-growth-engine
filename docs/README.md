@@ -20,14 +20,20 @@ design material. Use the V1 guides above for current daily CLI commands.
 4. [`architecture.md`](architecture.md) — data flow and design boundaries.
 5. [`troubleshooting.md`](troubleshooting.md) — common failures and safe recovery.
 6. [`EXPERIMENTAL_X_GROWTH_ENGINE_PLAN.md`](EXPERIMENTAL_X_GROWTH_ENGINE_PLAN.md) — the two-system daily discovery/draft design and V1/V2 boundaries.
-7. [`daily-architecture.md`](daily-architecture.md) — the daily discovery, draft, founder-review, and dormant Hermes flow.
+7. [`daily-architecture.md`](daily-architecture.md) — the daily discovery, draft, policy-gate, and publication flow.
 8. [`founder-review-contract.md`](founder-review-contract.md) — exact JSON review/import shape.
 9. [`.env.example`](../.env.example) — optional non-secret local path overrides.
+10. [`v2-automatic-publication.md`](v2-automatic-publication.md) — automatic V2 command, policy gate, writer, read-back, and recovery.
 
-The system is intentionally split into two responsibilities:
+The system is intentionally split into three responsibilities:
 
 - XActions MCP performs public read-only discovery and enrichment.
-- The local Node runner checkpoints, deduplicates, exports, scores, and reports.
+- The local Node runner checkpoints, deduplicates, exports, scores, evaluates,
+  and applies the publication policy.
+- The V2 writer performs only the configured post/reply/quote publication and
+  read-back.
 
-Credentials, cookies, contact inference, outreach, and X write actions are out
-of scope.
+V1 keeps X write actions out of scope. V2 adds only the three explicitly
+configured publication tools behind its automatic policy gate. Credentials and
+cookies stay in the Keychain-backed wrapper; contact inference and outreach
+remain out of scope.

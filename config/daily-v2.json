@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "mode": "EXPERIMENTAL_LIVE_AUTO",
+  "account": "nullquanty",
+  "facts_path": "config/marx-facts.json",
+  "source": {
+    "kind": "xactions_mcp",
+    "platform": "twitter",
+    "command": "/Users/0x79de/Documents/Codex/2026-09-02/bun/scripts/xactions-mcp.sh",
+    "args": [],
+    "read_tools": ["x_search_tweets", "x_get_profile", "x_get_tweets", "x_get_thread", "x_get_replies", "x_get_quote_tweets"]
+  },
+  "discovery": {
+    "lookback_hours": 48,
+    "queries_per_run": 12,
+    "result_limit_per_query": 10,
+    "max_raw_posts": 120,
+    "max_enriched_accounts": 10,
+    "timeline_limit_per_account": 20,
+    "max_contexts": 10,
+    "min_opportunity_score": 0.45,
+    "max_consecutive_runtime_failures": 3,
+    "retry_transient_attempts": 2,
+    "inter_call_delay_seconds": 3,
+    "call_timeout_ms": 60000
+  },
+  "intelligence": {
+    "max_opportunities": 5,
+    "candidates_per_opportunity": 3,
+    "max_review_drafts": 5,
+    "min_evaluation_score": 0.72,
+    "max_spam_risk": 0.2,
+    "max_repetition_risk": 0.25,
+    "max_unsupported_claim_risk": 0.15,
+    "max_codex_calls": 8,
+    "max_concurrent_codex_calls": 1,
+    "timeout_ms": 120000,
+    "run_timeout_ms": 1800000
+  },
+  "codex": {
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "xhigh",
+    "binary": "codex"
+  },
+  "content": {
+    "language": "en",
+    "max_chars": 280,
+    "marx_mentions": 1,
+    "links_allowed": false,
+    "ctas_allowed": false,
+    "hashtags_allowed": false,
+    "strategies": ["EVIDENCE_AND_PROVENANCE", "VALIDATION_AND_FAILURE_MODES", "AGENT_WORKFLOW", "RISK_AND_EXECUTION", "USEFUL_COUNTERPOINT", "SPECIFIC_CLARIFYING_QUESTION", "RESEARCH_TO_ACTION_BRIDGE"]
+  },
+  "storage": {
+    "root": "outputs/daily",
+    "database": "outputs/daily/x-growth.sqlite",
+    "events": "outputs/daily/events.jsonl"
+  },
+  "publisher": {
+    "enabled": true,
+    "mode": "AUTOMATIC",
+    "kill_switch": false,
+    "max_actions_per_run": 5,
+    "action_timeout_ms": 60000,
+    "readback_attempts": 3,
+    "readback_delay_ms": 5000,
+    "inter_action_delay_seconds": 5,
+    "write_tools": {
+      "POST_DRAFT": "x_post_tweet",
+      "REPLY_DRAFT": "x_reply",
+      "QUOTE_DRAFT": "x_quote_tweet"
+    }
+  }
+}

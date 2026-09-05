@@ -79,8 +79,9 @@ judgment is still needed to detect an unsupported paraphrase or extrapolation.
 ## Not provided
 
 V1 does not publish to X, run Hermes cron, schedule posts, monitor publication
-outcomes, contact prospects, or measure causal growth. V2 request/receipt code
-is dormant and is not invoked by V1 commands. Manual publication is outside the
-runner. Do not treat draft generation or approval import as proof of publication.
+outcomes, contact prospects, or measure causal growth. V2 automatic publication
+is isolated behind `npm run daily -- auto --config config/daily-v2.json`; V1
+commands cannot invoke it. Do not treat V1 draft generation or approval import
+as proof of publication.
 
 For commands and recovery guidance, use [V1 usage](v1-usage.md).

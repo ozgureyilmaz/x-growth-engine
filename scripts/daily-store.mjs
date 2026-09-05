@@ -4,6 +4,7 @@ import { hostname } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { eventEnvelope, DraftSchema, NoActionSchema, ReviewBundleSchema, stableStringify, sha256 } from './daily-contracts.mjs';
+import { AutoPublicationRequestSchema, AutoPublicationReceiptSchema } from './daily-publication-contracts.mjs';
 
 function quote(value) { return `'${String(value ?? '').replaceAll("'", "''")}'`; }
 
@@ -42,6 +43,12 @@ export class DailyStore {
       CREATE TABLE IF NOT EXISTS review_history(review_id TEXT PRIMARY KEY,action_id TEXT NOT NULL,action_hash TEXT NOT NULL,decision TEXT NOT NULL,reviewer TEXT NOT NULL,reviewed_at TEXT NOT NULL,payload_json TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS run_settings(run_id TEXT PRIMARY KEY,payload_json TEXT NOT NULL);
       INSERT INTO schema_migrations VALUES('003_replay_checkpoints',strftime('%Y-%m-%dT%H:%M:%fZ','now'));
+      COMMIT;`);
+    const publicationMigrated = runSql(this.database, "SELECT 1 AS done FROM schema_migrations WHERE version='004_publication_ledger';", true);
+    if (!publicationMigrated.length) runSql(this.database, `BEGIN IMMEDIATE;
+      CREATE TABLE IF NOT EXISTS publication_requests(request_id TEXT PRIMARY KEY,run_id TEXT NOT NULL,action_id TEXT NOT NULL UNIQUE,action_hash TEXT NOT NULL UNIQUE,request_hash TEXT NOT NULL UNIQUE,idempotency_key TEXT NOT NULL UNIQUE,status TEXT NOT NULL,created_at TEXT NOT NULL,claimed_at TEXT,updated_at TEXT NOT NULL,payload_json TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS publication_receipts(request_id TEXT PRIMARY KEY,action_id TEXT NOT NULL,action_hash TEXT NOT NULL,status TEXT NOT NULL,provider_id TEXT,permalink TEXT,observed_at TEXT NOT NULL,error_code TEXT,error_message TEXT,payload_json TEXT NOT NULL);
+      INSERT INTO schema_migrations VALUES('004_publication_ledger',strftime('%Y-%m-%dT%H:%M:%fZ','now'));
       COMMIT;`);
     this.initialized = true;
     await chmod(this.database,0o600);
@@ -170,6 +177,56 @@ export class DailyStore {
     const action = runSql(this.database, `SELECT action_hash AS action_hash FROM actions WHERE action_id=${quote(value.action_id)};`, true)[0];
     if (!action || action.action_hash !== value.action_hash) throw new Error('FOUNDER_REVIEW_ACTION_HASH_MISMATCH');
     runSql(this.database, `INSERT OR REPLACE INTO founder_reviews(action_id,action_hash,decision,reason,reviewed_at,payload_json) VALUES(${quote(value.action_id)},${quote(value.action_hash)},${quote(decision)},${quote(value.reason ?? '')},${quote(value.reviewed_at)},${quote(JSON.stringify(value))}); UPDATE actions SET status=${quote(decision)} WHERE action_id=${quote(value.action_id)};`);
+  }
+
+  async createPublicationRequest(value) {
+    const request = AutoPublicationRequestSchema.parse(value);
+    await this.init();
+    const existing = runSql(this.database, `SELECT request_id,action_hash,request_hash,status,payload_json FROM publication_requests WHERE request_id=${quote(request.request_id)} OR action_id=${quote(request.action.action_id)};`, true)[0];
+    if (existing && (existing.action_hash !== request.action_hash || existing.request_hash !== request.request_hash)) throw new Error('PUBLICATION_REQUEST_CONFLICT');
+    runSql(this.database, `INSERT OR IGNORE INTO publication_requests(request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,updated_at,payload_json) VALUES(${quote(request.request_id)},${quote(request.run_id)},${quote(request.action.action_id)},${quote(request.action_hash)},${quote(request.request_hash)},${quote(request.idempotency_key)},'PENDING',${quote(request.created_at)},${quote(request.created_at)},${quote(JSON.stringify(request))});`);
+    return (await this.listPublicationRequests(request.run_id)).find((item) => item.request_id === request.request_id) ?? request;
+  }
+
+  async claimPublicationRequest(requestId) {
+    await this.init();
+    const now = new Date().toISOString();
+    runSql(this.database, `BEGIN IMMEDIATE; UPDATE publication_requests SET status='CLAIMED',claimed_at=COALESCE(claimed_at,${quote(now)}),updated_at=${quote(now)} WHERE request_id=${quote(requestId)} AND status='PENDING'; COMMIT;`);
+    const row = runSql(this.database, `SELECT request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,claimed_at,updated_at,payload_json FROM publication_requests WHERE request_id=${quote(requestId)};`, true)[0];
+    return row ? { ...row, payload: JSON.parse(row.payload_json) } : undefined;
+  }
+
+  async savePublicationReceipt(value) {
+    const receipt = AutoPublicationReceiptSchema.parse(value);
+    await this.init();
+    const request = runSql(this.database, `SELECT action_id,action_hash FROM publication_requests WHERE request_id=${quote(receipt.request_id)};`, true)[0];
+    if (!request || request.action_id !== receipt.action_id || request.action_hash !== receipt.action_hash) throw new Error('PUBLICATION_RECEIPT_REQUEST_MISMATCH');
+    const existing = runSql(this.database, `SELECT payload_json FROM publication_receipts WHERE request_id=${quote(receipt.request_id)};`, true)[0];
+    if (existing) {
+      const prior = JSON.parse(existing.payload_json);
+      const fields = ['status', 'provider_id', 'permalink', 'error_code', 'error_message', 'action_hash', 'request_hash'];
+      if (fields.some((field) => prior[field] !== receipt[field])) throw new Error('PUBLICATION_RECEIPT_CONFLICT');
+      return AutoPublicationReceiptSchema.parse(prior);
+    }
+    runSql(this.database, `INSERT OR REPLACE INTO publication_receipts(request_id,action_id,action_hash,status,provider_id,permalink,observed_at,error_code,error_message,payload_json) VALUES(${quote(receipt.request_id)},${quote(receipt.action_id)},${quote(receipt.action_hash)},${quote(receipt.status)},${quote(receipt.provider_id)},${quote(receipt.permalink)},${quote(receipt.observed_at)},${quote(receipt.error_code)},${quote(receipt.error_message)},${quote(JSON.stringify(receipt))}); UPDATE publication_requests SET status=${quote(receipt.status)},updated_at=${quote(receipt.observed_at)} WHERE request_id=${quote(receipt.request_id)}; UPDATE actions SET status=${quote(receipt.status)} WHERE action_id=${quote(receipt.action_id)};`);
+    return receipt;
+  }
+
+  async listPublicationRequests(runId) {
+    await this.init();
+    const rows = runSql(this.database, `SELECT request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,claimed_at,updated_at,payload_json FROM publication_requests WHERE run_id=${quote(runId)} ORDER BY created_at,request_id;`, true);
+    return rows.map((row) => ({ ...row, payload: JSON.parse(row.payload_json) }));
+  }
+
+  async publicationHistory() {
+    await this.init();
+    const rows = runSql(this.database, 'SELECT action_id,action_hash,status,payload_json FROM publication_requests ORDER BY created_at;', true);
+    return rows.map((row) => ({ ...row, ...JSON.parse(row.payload_json).action }));
+  }
+
+  async markClaimedForReconciliation(runId) {
+    await this.init();
+    runSql(this.database, `BEGIN IMMEDIATE; UPDATE publication_requests SET status='RECONCILIATION_REQUIRED',updated_at=datetime('now') WHERE run_id=${quote(runId)} AND status IN ('PENDING','CLAIMED'); UPDATE actions SET status='RECONCILIATION_REQUIRED' WHERE action_id IN (SELECT action_id FROM publication_requests WHERE run_id=${quote(runId)} AND status='RECONCILIATION_REQUIRED'); COMMIT;`);
   }
 
   async writeReviewBundle(file, bundle) {

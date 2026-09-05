@@ -21,11 +21,17 @@ and complete-search finalization. These guarantees apply to the local batch
 controller; they do not turn it into a general web scraper or prove that the
 external MCP provider is production-ready.
 
-The experimental daily path is implemented on branch
+The experimental daily V1 path is implemented on branch
 `experimental-x-growth-engine`. It uses a direct, allowlisted XActions MCP
 read adapter, a local SQLite control plane, Codex Exec for model stages, and a
 founder-review bundle. V1 never publishes to X; `nullquanty` is the declared
 draft account and publication is manual.
+
+V2 automatic publication is implemented behind the separate
+`config/daily-v2.json` configuration and the explicit `npm run daily -- auto`
+command. It keeps V1 manual-safe defaults unchanged and publishes only actions
+that pass the deterministic V2 policy gate, then verifies each result through
+read-back and stores a versioned receipt.
 
 ## Proposed comprehensive-run boundary
 
@@ -136,9 +142,9 @@ Optional non-secret environment overrides are documented in [`.env.example`](.en
 XActions session tokens and cookies are intentionally excluded; the default
 wrapper resolves them from macOS Keychain.
 
-V1's `READY_FOR_FOUNDER_REVIEW` result is not publication evidence. The dormant
-V2 request/receipt contract is available for testing only and does not invoke a
-publisher.
+V1's `READY_FOR_FOUNDER_REVIEW` result is not publication evidence. V2 uses a
+separate automatic mode; its request/receipt artifacts are persisted for every
+write attempt and unknown outcomes require reconciliation.
 
 For the full operating procedure, read
 [`docs/runbook.md`](docs/runbook.md). For output fields and QA checks, read

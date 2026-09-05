@@ -126,7 +126,8 @@ export const ReviewBundleSchema = z.object({
   facts: z.array(z.record(z.unknown())).optional(),
   decisions: z.array(z.record(z.unknown())).optional(),
   model_calls: z.number().int().nonnegative().optional(),
-  publisher_enabled: z.literal(false),
+  publisher_enabled: z.boolean(),
+  publication: z.record(z.unknown()).optional(),
 }).strict();
 
 export const nowIso = () => new Date().toISOString();

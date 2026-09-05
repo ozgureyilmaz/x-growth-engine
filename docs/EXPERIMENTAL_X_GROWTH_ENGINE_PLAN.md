@@ -1,6 +1,8 @@
 # Experimental X Growth Engine Plan
 
-Plan status: implementation in progress on branch `experimental-x-growth-engine`; V1 publication remains manual.
+Plan status: V1 is manual-safe; V2 automatic publication is implemented on
+`codex/v2-automatic-publication` and remains opt-in through a separate config
+and explicit command.
 
 ## Objective
 
@@ -13,13 +15,15 @@ free of paid X APIs and paid model APIs, and safe to rerun.
 
 - XActions is an explicitly unofficial experimental read source. Only the
   allowlisted read tools `x_search_tweets`, `x_get_profile`, `x_get_tweets`,
-  `x_get_thread`, and `x_get_replies` are callable by the source adapter.
+  `x_get_thread`, `x_get_replies`, and `x_get_quote_tweets` are callable by the
+  source/read-back adapter.
 - V1 automates read, ranking, context analysis, candidate generation,
   independent evaluation, deterministic QA, and founder-review export. It never
   publishes, likes, reposts, follows, bookmarks, DMs, or edits an X account.
-- V2 publication is a dormant, hash-bound request/receipt contract. It remains
-  disabled until a separate platform-permission and risk decision; no non-API
-  write adapter is enabled by this branch.
+- V2 publication uses an enabled, hash-bound request/receipt contract and a
+  dedicated XActions write adapter for the three configured draft actions. It
+  is never reached by V1 commands; the explicit `auto` command and V2 config
+  are required.
 - All cross-system messages are versioned JSON. SQLite is the durable source of
   truth; JSONL logs and review bundles are derived/audit artifacts.
 - All model work uses the authenticated Codex Plus session through
@@ -69,22 +73,23 @@ Every record carries `schema_version`, `message_type`, `event_id`, `run_id`,
 `created_at`, `idempotency_key`, and payload hashes. Action drafts additionally
 carry source IDs, context hash, target, action type, body hash, action hash,
 strategy/prompt/model provenance, evaluation scores, QA results, and account
-identity. Founder decisions bind to the exact action hash.
+identity. Founder decisions bind to the exact action hash; V2 automatic
+authorization binds the action to a policy version/hash instead.
 
-V2-only request states are `PENDING`, `CLAIMED`, `PUBLISHED`, `FAILED`,
-`RETRYABLE`, and `RECONCILIATION_REQUIRED`; unknown provider outcomes are never
-blindly retried.
+V2 automatic request states are `PENDING`, `CLAIMED`, `PUBLISHED`, `FAILED`,
+and `RECONCILIATION_REQUIRED`; unknown provider outcomes are never blindly
+retried.
 
 ## Verification and rollout
 
 V1 is operated manually on the Mac with `npm run daily -- doctor --live-read`,
 `npm run daily -- recover --run-id <id>`, `npm run daily -- replay
 --run-id <id> --max-drafts 0|1`, and `npm run daily -- run --mode
-EXPERIMENTAL_LIVE_READ --max-drafts 5`. The first live-read pilot must keep
-publishing disabled and inspect the JSON review bundle. A future Hermes no-agent
-cron may own the daily clock only after local replay, lock, failure-injection,
-and founder-review import tests pass. Hermes must not rewrite or invent action
-bodies.
+EXPERIMENTAL_LIVE_READ --max-drafts 5`. V2 is invoked explicitly with
+`npm run daily -- auto --config config/daily-v2.json --max-actions 5`; Hermes
+only owns the external clock and must not rewrite or invent action bodies.
+Automatic dry-run, fake-MCP writer tests, read-back tests, lock/recovery tests,
+and partial-failure tests must pass before adding the Hermes cron command.
 
 Primary metric: founder publishability approval rate = founder-approved drafts / reviewed drafts; source of truth: exact-hash founder-review import; cohort/window: one daily run and its weekly aggregate; evidence status: proposed.
 
