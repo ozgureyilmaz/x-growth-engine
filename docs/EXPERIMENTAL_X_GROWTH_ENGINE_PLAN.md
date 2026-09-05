@@ -21,9 +21,9 @@ free of paid X APIs and paid model APIs, and safe to rerun.
   independent evaluation, deterministic QA, and founder-review export. It never
   publishes, likes, reposts, follows, bookmarks, DMs, or edits an X account.
 - V2 publication uses an enabled, hash-bound request/receipt contract and a
-  dedicated XActions write adapter for the three configured draft actions. It
-  is never reached by V1 commands; the explicit `auto` command and V2 config
-  are required.
+  Hermes publisher bridge for the three configured draft actions. It is never
+  reached by V1 commands; the explicit `auto` command and V2 config are
+  required.
 - All cross-system messages are versioned JSON. SQLite is the durable source of
   truth; JSONL logs and review bundles are derived/audit artifacts.
 - All model work uses the authenticated Codex Plus session through
@@ -79,7 +79,8 @@ Every record carries `schema_version`, `message_type`, `event_id`, `run_id`,
 carry source IDs, context hash, target, action type, body hash, action hash,
 strategy/prompt/model provenance, evaluation scores, QA results, and account
 identity. Founder decisions bind to the exact action hash; V2 automatic
-authorization binds the action to a policy version/hash instead.
+authorization binds the action to a policy version/hash instead. Hermes returns
+the provider receipt; the engine does not call an X write tool directly.
 
 V2 automatic request states are `PENDING`, `CLAIMED`, `PUBLISHED`, `FAILED`,
 and `RECONCILIATION_REQUIRED`; unknown provider outcomes are never blindly

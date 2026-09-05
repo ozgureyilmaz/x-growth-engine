@@ -11,7 +11,7 @@ import { runStage } from './daily-codex.mjs';
 import { ROOT,ConfigSchema,loadConfig,loadJson,resolvePath,approvedFacts,throwIfAborted,delay,errorCode,atomicJson } from './daily-runtime.mjs';
 import { evaluatePublicationPolicy } from './daily-policy.mjs';
 import { AutoPublicationReceiptSchema, buildAutoPublicationRequest, verifyAutoReceipt } from './daily-publication-contracts.mjs';
-import { XActionsMcpPublisher } from './daily-publisher.mjs';
+import { HermesXPublisher } from './hermes-x-publisher.mjs';
 
 export function buildDailyQueries(queryConfig,now,count,lookbackHours=48) {
   const day=Math.floor(now.getTime()/86400000);
@@ -260,7 +260,7 @@ export async function executeDaily(options={}) {
       if(autoMode&&selected.length){
         const grant={grant_id:`grant_${runId}`,publisher_account:'nullquanty',expires_at:new Date(now.getTime()+config.intelligence.run_timeout_ms).toISOString(),max_actions:maxDrafts};
         const priorActions=await store.publicationHistory();
-        if(!options.dryRun)publisher=options.publisher||new XActionsMcpPublisher({command:config.source.command,args:config.source.args,cwd:ROOT,callTimeoutMs:config.publisher.action_timeout_ms,readbackAttempts:config.publisher.readback_attempts,readbackDelayMs:config.publisher.readback_delay_ms,interActionDelaySeconds:config.publisher.inter_action_delay_seconds,writeTools:config.publisher.write_tools,readbackTools:[...new Set([...config.source.read_tools,'x_get_quote_tweets'])],signal});
+        if(!options.dryRun)publisher=options.publisher||new HermesXPublisher({hermesCommand:process.env.HERMES_BIN||'hermes',model:'gpt-5.6-luna',reasoningEffort:'xhigh',timeoutMs:config.publisher.action_timeout_ms,cwd:ROOT});
         try{
           for(const draft of selected){
             throwIfAborted(signal);
@@ -272,11 +272,11 @@ export async function executeDaily(options={}) {
             if(options.dryRun){await atomicJson(path.join(out,`publication-request-${draft.action_id}.json`),request);continue;}
             let claimed=false;
             try{
-              await store.createPublicationRequest(request);const claim=await store.claimPublicationRequest(request.request_id);if(!claim)throw new Error('PUBLICATION_CLAIM_FAILED');
+              const requestPath=path.join(out,`publication-request-${draft.action_id}.json`);await atomicJson(requestPath,request);await store.createPublicationRequest(request);const claim=await store.claimPublicationRequest(request.request_id);if(!claim)throw new Error('PUBLICATION_CLAIM_FAILED');
               if(claim.status==='PUBLISHED'){publication.blocked+=1;continue;}
               if(claim.status!=='CLAIMED')throw new Error('PUBLICATION_CLAIM_FAILED');
               claimed=true;publication.attempted+=1;await store.saveEvent(runId,'X_PUBLICATION_ATTEMPTED',{action_id:draft.action_id,request_id:request.request_id,action_hash:draft.action_hash},`${runId}:publish:${draft.action_id}:attempt`);
-              const result=await publisher.publishAndVerify(draft);
+              const result=await publisher.publishRequest(requestPath);
               const receipt=AutoPublicationReceiptSchema.parse({schema_version:'2.0',message_type:'X_PUBLICATION_RECEIPT',request_id:request.request_id,action_id:draft.action_id,publisher_account:'nullquanty',idempotency_key:request.idempotency_key,action_hash:request.action_hash,request_hash:request.request_hash,status:result.status,provider_id:result.provider_id,permalink:result.permalink,observed_at:nowIso(),error_code:result.error_code,error_message:result.error_message});
               verifyAutoReceipt(request,receipt);await store.savePublicationReceipt(receipt);publication.receipts.push(receipt);await atomicJson(path.join(out,`publication-request-${draft.action_id}.json`),request);await atomicJson(path.join(out,`publication-receipt-${draft.action_id}.json`),receipt);
               if(receipt.status==='PUBLISHED')publication.published+=1;else if(receipt.status==='RECONCILIATION_REQUIRED')publication.reconciliation_required+=1;else publication.failed+=1;

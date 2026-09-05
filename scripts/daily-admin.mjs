@@ -3,7 +3,6 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { DailyStore, withRunLock } from './daily-store.mjs';
 import { XActionsMcpSource } from './daily-source.mjs';
-import { XActionsMcpPublisher } from './daily-publisher.mjs';
 
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
 const CONFIG_PATH = path.join(ROOT, 'config/daily-experiment.json');
@@ -42,8 +41,10 @@ export async function doctor(options = {}) {
     try { checks.live_read_preflight = await source.preflight(`the lang:en since:${new Date(Date.now() - config.discovery.lookback_hours * 3600000).toISOString().slice(0, 10)}`); } catch (error) { checks.live_read_preflight = { status: 'failed', error: error instanceof Error ? error.message : String(error) }; } finally { await source.close().catch(() => undefined); }
   }
   if (options.auto) {
-    const publisher = new XActionsMcpPublisher({ command: process.env.XGE_XACTIONS_MCP_COMMAND ?? config.source.command, args: config.source.args, readbackTools: [...new Set([...config.source.read_tools, 'x_get_quote_tweets'])], writeTools: config.publisher.write_tools, callTimeoutMs: config.publisher.action_timeout_ms });
-    try { await publisher.connect(); checks.publisher_preflight = { status: 'passed', write_tools: Object.values(config.publisher.write_tools), readback_tools: [...new Set([...config.source.read_tools, 'x_get_quote_tweets'])] }; } catch (error) { checks.publisher_preflight = { status: 'failed', error: error instanceof Error ? error.message : String(error) }; } finally { await publisher.close().catch(() => undefined); }
+    checks.hermes_binary=commandPresent(process.env.HERMES_BIN||'hermes',['--help']);
+    checks.hermes_skill=await access(path.join(ROOT,'hermes/skills/x-growth-publisher/SKILL.md')).then(()=>true).catch(()=>false);
+    checks.hermes_model='gpt-5.6-luna'; checks.hermes_reasoning_effort='xhigh';
+    checks.publisher_preflight=checks.hermes_binary&&checks.hermes_skill?{status:'passed',transport:'hermes_cli',model:checks.hermes_model,reasoning_effort:checks.hermes_reasoning_effort,skill:'x-growth-publisher'}:{status:'failed',error:checks.hermes_binary?'HERMES_SKILL_MISSING':'HERMES_BINARY_MISSING'};
   }
   const required = ['sqlite3', 'codex', 'codex_login', 'xactions_wrapper', 'lock_healthy', 'facts_ready'];
   if (options.auto) required.push('publisher_active'); else required.push('publisher_disabled');

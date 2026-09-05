@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import test from 'node:test';
 
 import { buildAutoPublicationRequest, verifyAutoReceipt } from '../scripts/daily-publication-contracts.mjs';
@@ -10,7 +9,7 @@ import { evaluatePublicationPolicy } from '../scripts/daily-policy.mjs';
 import { buildDraft } from '../scripts/daily-intelligence.mjs';
 import { DailyStore, withRunLock } from '../scripts/daily-store.mjs';
 import { compactContext, compactEvaluationContext, executeDaily, main } from '../scripts/run-daily.mjs';
-import { XActionsMcpPublisher } from '../scripts/daily-publisher.mjs';
+import { buildHermesArgs, HermesXPublisher, parseHermesReceipt } from '../scripts/hermes-x-publisher.mjs';
 import { normalizePost, sha256 } from '../scripts/daily-contracts.mjs';
 
 function autoConfig(root) {
@@ -112,57 +111,28 @@ test('CLI automatic mode is explicit and V1 run cannot select it', async () => {
   await assert.rejects(main(['run', '--config', 'config/daily-v2.json']), /AUTO_REQUIRES_EXPLICIT_COMMAND/);
 });
 
-async function fakePublisherServer(root, readback = true) {
-  const server = path.join(root, `fake-publisher-${readback ? 'ok' : 'unknown'}.mjs`);
-  await writeFile(server, `import { Server } from '${pathToFileURL(path.join(process.cwd(), 'node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js')).href}';
-import { StdioServerTransport } from '${pathToFileURL(path.join(process.cwd(), 'node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js')).href}';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '${pathToFileURL(path.join(process.cwd(), 'node_modules/@modelcontextprotocol/sdk/dist/esm/types.js')).href}';
-const published=[]; const server=new Server({name:'fake-publisher',version:'1.0'},{capabilities:{tools:{}}});
-const names=['x_post_tweet','x_reply','x_quote_tweet','x_get_tweets','x_get_replies','x_get_quote_tweets'];
-server.setRequestHandler(ListToolsRequestSchema, async()=>({tools:names.map(name=>({name,inputSchema:{type:'object'}}))}));
-server.setRequestHandler(CallToolRequestSchema, async(request)=>{ const {name,arguments:args={}}=request.params; const now=new Date().toISOString();
-  if(name==='x_post_tweet'){published.push({kind:'post',text:args.text,id:'2001',url:'https://x.com/nullquanty/status/2001',timestamp:now});return {content:[{type:'text',text:JSON.stringify({success:true})}]};}
-  if(name==='x_reply'){published.push({kind:'reply',text:args.text,id:'2002',url:'https://x.com/nullquanty/status/2002',timestamp:now,target:args.url});return {content:[{type:'text',text:JSON.stringify({success:true})}]};}
-  if(name==='x_quote_tweet'){published.push({kind:'quote',text:args.text,id:'2003',url:'https://x.com/nullquanty/status/2003',timestamp:now,target:args.tweetUrl});return {content:[{type:'text',text:JSON.stringify({success:true})}]};}
-  if(name==='x_get_tweets'){const rows=${readback ? 'published.filter(item=>item.kind!==\'reply\')' : '[]'};return {content:[{type:'text',text:JSON.stringify(rows.map(item=>({id:item.id,username:'nullquanty',text:item.text,url:item.url,timestamp:item.timestamp})))}]};}
-  if(name==='x_get_replies'){const rows=${readback ? 'published.filter(item=>item.kind===\'reply\' && item.target===args.tweetUrl)' : '[]'};return {content:[{type:'text',text:JSON.stringify(rows.map(item=>({id:item.id,username:'nullquanty',text:item.text,url:item.url,timestamp:item.timestamp})))}]};}
-  if(name==='x_get_quote_tweets'){const rows=${readback ? 'published.filter(item=>item.kind===\'quote\' && item.target===args.tweetUrl)' : '[]'};return {content:[{type:'text',text:JSON.stringify({quotes:rows.map(item=>({text:item.text,author:'@nullquanty',timestamp:item.timestamp}))})}]};}
-  return {content:[{type:'text',text:JSON.stringify({error:'unknown tool'})}],isError:true}; });
-await server.connect(new StdioServerTransport());`);
-  return server;
-}
-
-function actionOf(type, body = `A ${type.toLowerCase()} contribution for Marx.`) {
-  return buildDraft({ action_type: type, body, strategy_family: 'EVIDENCE_AND_PROVENANCE', hook_family: 'specific_context' }, { post: { provider_id: '1001', url: 'https://x.com/builder/status/1001', username: 'builder', text: 'Building an AI trading agent' }, context_hash: 'a'.repeat(64) }, { context_fit: 0.9, usefulness: 0.9, naturalness: 0.9, marx_relevance: 0.9, spam_risk: 0.01, repetition_risk: 0.01, unsupported_claim_risk: 0.01, decision: 'PUBLISHABLE' }, { passed: true, reasons: [] }, { run_id: 'auto', fact_ids: ['marx-agent-first-finance-platform'], prompt_versions: { generation: 'v2' } });
-}
-
-test('publisher maps all V2 actions and requires read-back evidence', async (t) => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'xge-v2-publisher-'));
-  t.after(() => rm(root, { recursive: true, force: true }));
-  const server = await fakePublisherServer(root, true);
-  let publisher;
-  t.after(() => publisher?.close());
-  publisher = new XActionsMcpPublisher({ command: process.execPath, args: [server], callTimeoutMs: 5000, readbackAttempts: 1, readbackDelayMs: 0, interActionDelaySeconds: 0 });
-  for (const type of ['POST_DRAFT', 'REPLY_DRAFT', 'QUOTE_DRAFT']) {
-    const action = actionOf(type, `Contextual ${type.toLowerCase()} for Marx.`);
-    if (type !== 'POST_DRAFT') action.target.post_url = 'https://x.com/builder/status/1001';
-    const result = await publisher.publishAndVerify(action);
-    assert.equal(result.status, 'PUBLISHED');
-    assert.ok(result.provider_id);
-  }
-  await publisher.close();
+test('Hermes receipt parser ignores CLI noise and returns the final receipt', () => {
+  const receipt = parseHermesReceipt('Hermes started\n{"schema_version":"2.0","message_type":"X_PUBLICATION_RECEIPT","request_id":"r","action_id":"a","publisher_account":"nullquanty","idempotency_key":"i","action_hash":"' + 'a'.repeat(64) + '","request_hash":"' + 'b'.repeat(64) + '","status":"PUBLISHED","provider_id":"2001","permalink":"https://x.com/nullquanty/status/2001","observed_at":"2026-09-05T10:00:00.000Z"}\n');
+  assert.equal(receipt.status, 'PUBLISHED');
+  assert.equal(receipt.provider_id, '2001');
 });
 
-test('publisher converts a successful write with no read-back into reconciliation', async (t) => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'xge-v2-publisher-unknown-'));
+test('Hermes invocation is pinned to openai-codex Luna xhigh browser execution', () => {
+  const args = buildHermesArgs('execute request', { timeoutMs: 180000 });
+  assert.deepEqual(args.slice(0, 10), ['chat', '-Q', '--provider', 'openai-codex', '-m', 'gpt-5.6-luna', '--reasoning', 'xhigh', '--toolsets', 'browser']);
+});
+
+test('Hermes publisher validates the request and accepts a hash-bound Hermes receipt', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'xge-hermes-publisher-'));
   t.after(() => rm(root, { recursive: true, force: true }));
-  const server = await fakePublisherServer(root, false);
-  let publisher;
-  t.after(() => publisher?.close());
-  publisher = new XActionsMcpPublisher({ command: process.execPath, args: [server], callTimeoutMs: 5000, readbackAttempts: 1, readbackDelayMs: 0, interActionDelaySeconds: 0 });
-  const result = await publisher.publishAndVerify(actionOf('POST_DRAFT', 'A readback test for Marx.'));
-  assert.equal(result.status, 'RECONCILIATION_REQUIRED');
-  await publisher.close();
+  const action = draft();
+  const policy = evaluatePublicationPolicy(action, autoConfig(root), { facts: [{ fact_id: 'marx-agent-first-finance-platform', status: 'APPROVED', expires_at: '2026-10-05T10:00:00.000Z' }], attempted: 0, priorActions: [] });
+  const request = buildAutoPublicationRequest(action, policy, { grant_id: 'grant_hermes', publisher_account: 'nullquanty', expires_at: '2026-09-05T11:00:00.000Z', max_actions: 5 }, new Date('2026-09-05T10:00:00.000Z'), 'hermes-run');
+  const requestPath = path.join(root, 'request.json');
+  await writeFile(requestPath, JSON.stringify(request));
+  const publisher = new HermesXPublisher({ runHermes: async () => JSON.stringify({ schema_version: '2.0', message_type: 'X_PUBLICATION_RECEIPT', request_id: request.request_id, action_id: action.action_id, publisher_account: 'nullquanty', idempotency_key: request.idempotency_key, action_hash: request.action_hash, request_hash: request.request_hash, status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001', observed_at: '2026-09-05T10:01:00.000Z' }) });
+  const receipt = await publisher.publishRequest(requestPath);
+  assert.equal(receipt.status, 'PUBLISHED');
 });
 
 test('automatic pipeline publishes policy-approved drafts without founder review', async (t) => {
@@ -175,7 +145,7 @@ test('automatic pipeline publishes policy-approved drafts without founder review
   const now = new Date('2026-09-05T10:00:00.000Z');
   const post = normalizePost({ id: '1001', username: 'builder', text: 'Building an AI trading agent', timestamp: '2026-09-05T09:00:00.000Z', url: 'https://x.com/builder/status/1001', likes: 8, retweets: 2, replies: 1 }, 'q', 'bucket', now.toISOString());
   const source = { preflight: async () => ({ status: 'passed', result_count: 1 }), search: async () => [post], profile: async () => undefined, timeline: async () => [], replies: async () => { throw new Error('localTools.getPage is not a function'); }, thread: async () => ({ raw: null, completeness: 'unknown', retrieved_at: now.toISOString() }), close: async () => {} };
-  const publisher = { publishAndVerify: async () => ({ status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' }), close: async () => {} };
+  const publisher = { publishRequest: async () => ({ status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' }), close: async () => {} };
   const result = await executeDaily({ config, mode: 'EXPERIMENTAL_LIVE_AUTO', source, publisher, maxActions: 1, runId: 'auto_publish_run', now, queryConfig: { language: 'en', buckets: { bucket: ['"AI trading agent"'] } }, modelRunner: async (stage) => stage === 'opportunity' ? [{ context_index: 0, opportunity_score: 0.9, confidence: 0.9, recommended_action_type: 'REPLY_DRAFT', reason: 'specific builder problem' }] : stage === 'generation' ? [{ context_index: 0, action_type: 'REPLY_DRAFT', body: 'For this trading agent, log failed fills first. Marx can make those assumptions inspectable.', strategy_family: 'EVIDENCE_AND_PROVENANCE', hook_family: 'specific_context', fact_ids: ['marx-agent-first-finance-platform'] }] : [{ draft_index: 0, scores: { context_fit: 0.9, usefulness: 0.9, naturalness: 0.9, marx_relevance: 0.9, spam_risk: 0.01, repetition_risk: 0.01, unsupported_claim_risk: 0.01 }, decision: 'PUBLISHABLE', reasons: ['specific'] }] });
   assert.equal(result.status, 'AUTO_PUBLISHED');
   assert.equal(result.publication.published, 1);
@@ -195,7 +165,7 @@ test('automatic pipeline continues after a bounded publication failure', async (
   const post = normalizePost({ id: '1001', username: 'builder', text: 'Building an AI trading agent', timestamp: '2026-09-05T09:00:00.000Z', url: 'https://x.com/builder/status/1001', likes: 8, retweets: 2, replies: 1 }, 'q', 'bucket', now.toISOString());
   const source = { preflight: async () => ({ status: 'passed', result_count: 1 }), search: async () => [post], profile: async () => undefined, timeline: async () => [], replies: async () => [], thread: async () => ({ raw: null, completeness: 'unknown', retrieved_at: now.toISOString() }), close: async () => {} };
   let calls = 0;
-  const publisher = { publishAndVerify: async () => (++calls === 1 ? { status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' } : { status: 'FAILED', error_code: 'PUBLISH_PROVIDER_REJECTED', error_message: 'provider rejected' }), close: async () => {} };
+  const publisher = { publishRequest: async () => (++calls === 1 ? { status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' } : { status: 'FAILED', error_code: 'PUBLISH_PROVIDER_REJECTED', error_message: 'provider rejected' }), close: async () => {} };
   const bodies = ['For this trading agent, log failed fills first. Marx can make those assumptions inspectable.', 'For this trading agent, preserve rejected orders. Marx can make the discussion auditable.'];
   const result = await executeDaily({ config, mode: 'EXPERIMENTAL_LIVE_AUTO', source, publisher, maxActions: 2, runId: 'auto_partial_run', now, queryConfig: { language: 'en', buckets: { bucket: ['"AI trading agent"'] } }, modelRunner: async (stage) => stage === 'opportunity' ? [{ context_index: 0, opportunity_score: 0.9, confidence: 0.9, recommended_action_type: 'REPLY_DRAFT', reason: 'specific builder problem' }] : stage === 'generation' ? bodies.map(body => ({ context_index: 0, action_type: 'REPLY_DRAFT', body, strategy_family: 'EVIDENCE_AND_PROVENANCE', hook_family: 'specific_context', fact_ids: ['marx-agent-first-finance-platform'] })) : bodies.map((_, draft_index) => ({ draft_index, scores: { context_fit: 0.9, usefulness: 0.9, naturalness: 0.9, marx_relevance: 0.9, spam_risk: 0.01, repetition_risk: 0.01, unsupported_claim_risk: 0.01 }, decision: 'PUBLISHABLE', reasons: ['specific'] })) });
   assert.equal(result.status, 'PARTIAL');
@@ -218,7 +188,7 @@ test('automatic pipeline regenerates evaluator-rejected drafts once before publi
   const rejected = 'This repeats a promotional bridge for the trading agent. Marx is useful.';
   const repaired = 'For this trading agent, preserve rejected fills in the event log. Marx can make the assumptions inspectable.';
   let evaluationCalls = 0;
-  const publisher = { publishAndVerify: async () => ({ status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' }), close: async () => {} };
+  const publisher = { publishRequest: async () => ({ status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' }), close: async () => {} };
   const result = await executeDaily({ config, mode: 'EXPERIMENTAL_LIVE_AUTO', source, publisher, maxActions: 2, runId: 'auto_regenerate_run', now, queryConfig: { language: 'en', buckets: { bucket: ['"AI trading agent"'] } }, modelRunner: async (stage, input) => stage === 'opportunity' ? [{ context_index: 0, opportunity_score: 0.9, confidence: 0.9, recommended_action_type: 'REPLY_DRAFT', reason: 'specific builder problem' }] : stage === 'generation' ? (evaluationCalls === 0 ? [{ context_index: 0, action_type: 'REPLY_DRAFT', body: good, strategy_family: 'EVIDENCE_AND_PROVENANCE', hook_family: 'specific_context', fact_ids: ['marx-agent-first-finance-platform'] }, { context_index: 0, action_type: 'REPLY_DRAFT', body: rejected, strategy_family: 'VALIDATION_AND_FAILURE_MODES', hook_family: 'repeated_bridge', fact_ids: ['marx-agent-first-finance-platform'] }] : [{ context_index: 0, action_type: 'REPLY_DRAFT', body: repaired, strategy_family: 'EVIDENCE_AND_PROVENANCE', hook_family: 'repaired_context', fact_ids: ['marx-agent-first-finance-platform'] }]) : (++evaluationCalls === 1 ? [{ draft_index: 0, scores: { context_fit: 0.9, usefulness: 0.9, naturalness: 0.9, marx_relevance: 0.9, spam_risk: 0.01, repetition_risk: 0.01, unsupported_claim_risk: 0.01 }, decision: 'PUBLISHABLE', reasons: ['good'] }, { draft_index: 1, scores: { context_fit: 0.9, usefulness: 0.8, naturalness: 0.8, marx_relevance: 0.9, spam_risk: 0.3, repetition_risk: 0.8, unsupported_claim_risk: 0.2 }, decision: 'REGENERATE', reasons: ['repetition and promotional risk'] }] : [{ draft_index: 0, scores: { context_fit: 0.9, usefulness: 0.9, naturalness: 0.9, marx_relevance: 0.9, spam_risk: 0.01, repetition_risk: 0.01, unsupported_claim_risk: 0.01 }, decision: 'PUBLISHABLE', reasons: ['repaired'] }] ) });
   assert.equal(result.status, 'AUTO_PUBLISHED');
   assert.equal(result.publication.published, 2);

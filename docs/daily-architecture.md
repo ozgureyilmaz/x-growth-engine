@@ -16,9 +16,9 @@ flowchart LR
   K --> M[V1 manual publication]
   K -. V2 automatic .-> N[Automated policy gate]
   N --> O[Hash-bound publication request]
-  O --> P[Direct XActions write adapter]
-  P --> Q[Read-back verification]
-  Q --> R[Publication receipt or reconciliation]
+  O --> P[Hermes publisher agent<br/>gpt-5.6-luna / xhigh]
+  P --> Q[Authenticated X account action<br/>browser tool]
+  Q --> R[Hermes JSON receipt]
 ```
 
 System 1 owns bounded XActions reads and durable evidence. System 2 owns all

@@ -2,8 +2,8 @@
 
 V2 runs the V1 discovery and intelligence pipeline and publishes eligible
 `POST_DRAFT`, `REPLY_DRAFT`, and `QUOTE_DRAFT` actions without a founder review
-step. The engine owns the policy gate and publication; Hermes is only the clock
-that invokes the explicit `auto` command.
+step. The engine owns the policy gate and request spool; Hermes is the publisher
+agent and also the external clock that invokes the explicit `auto` command.
 
 ## Configuration
 
@@ -81,8 +81,9 @@ approval record.
 
 Each action produces a versioned `X_PUBLICATION_REQUEST` with an automated
 policy authorization, a run-scoped grant, an idempotency key, and exact hashes.
-The writer maps requests to the three allowlisted XActions tools. A generic
-provider success is not treated as publication evidence.
+The engine invokes Hermes with `openai-codex`, `gpt-5.6-luna`, and `xhigh` and
+the `x-growth-publisher` skill. Hermes owns the authenticated X account action;
+the engine accepts only a hash-bound JSON receipt.
 
 Read-back must find exactly one matching post/reply/quote authored by
 `nullquanty`. A verified result creates an `X_PUBLICATION_RECEIPT` with provider
@@ -109,4 +110,7 @@ accepting an incompatible checkpoint hash.
 
 The engine does not create or edit Hermes schedules. Configure Hermes to invoke
 the explicit command above from this repository. Keep one scheduler owner and
-let the engine's run lock reject concurrent runs.
+let the engine's run lock reject concurrent runs. Install or link
+`hermes/skills/x-growth-publisher/SKILL.md` into Hermes before enabling the job.
+Run `hermes doctor` first; a malformed Hermes session database must be repaired
+or restored from its backup before automated publisher sessions are enabled.

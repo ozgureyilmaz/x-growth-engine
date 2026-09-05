@@ -30,8 +30,8 @@ The system is intentionally split into three responsibilities:
 - XActions MCP performs public read-only discovery and enrichment.
 - The local Node runner checkpoints, deduplicates, exports, scores, evaluates,
   and applies the publication policy.
-- The V2 writer performs only the configured post/reply/quote publication and
-  read-back.
+- The V2 Hermes publisher performs only the configured post/reply/quote
+  publication and returns a hash-bound receipt.
 
 V1 keeps X write actions out of scope. V2 adds only the three explicitly
 configured publication tools behind its automatic policy gate. Credentials and
