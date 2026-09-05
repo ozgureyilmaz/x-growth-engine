@@ -96,6 +96,10 @@ If a process stops after claiming a request, run recovery before another
 automatic run. Claimed requests are reconciled first and are not republished
 blindly.
 
+Model checkpoints are namespaced by the compact-input version. After a payload
+format change, resume safely recomputes the affected model stages instead of
+accepting an incompatible checkpoint hash.
+
 ## Hermes integration
 
 The engine does not create or edit Hermes schedules. Configure Hermes to invoke

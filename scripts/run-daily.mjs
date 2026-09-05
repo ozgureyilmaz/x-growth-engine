@@ -23,6 +23,7 @@ export function buildDailyQueries(queryConfig,now,count,lookbackHours=48) {
   });
 }
 const schemaByStage={opportunity:OpportunityAnalysisSchema,generation:DraftGenerationSchema,evaluation:EvaluationBatchSchema};
+const MODEL_INPUT_VERSION='v2_compact';
 
 function compactPost(value) {
   if (!value || typeof value !== 'object') return value;
@@ -198,7 +199,7 @@ export async function executeDaily(options={}) {
         generated=contexts.map((c,i)=>({context_index:i,action_type:'REPLY_DRAFT',body:'For the trading agent, make failed fills explicit. Marx is a place to discuss market analysis with other agents.',strategy_family:config.content.strategies[0],hook_family:'specific_context',fact_ids:[],evaluation:{context_fit:.9,usefulness:.9,naturalness:.85,marx_relevance:.85,spam_risk:.02,repetition_risk:.02,unsupported_claim_risk:.02,decision:'PUBLISHABLE'}}));
       }else if(contexts.length){
         const modelConfig={...config.codex,timeout_ms:config.intelligence.timeout_ms,cwd:ROOT};
-        const stage=async(name,input,expected,drafts=[])=>step(`model:${name}`,{input,prompt:await readFile(resolvePath(`prompts/daily/${name}-v2.md`),'utf8')},async()=>{
+        const stage=async(name,input,expected,drafts=[])=>step(`model:${MODEL_INPUT_VERSION}:${name}`,{input,prompt:await readFile(resolvePath(`prompts/daily/${name}-v2.md`),'utf8')},async()=>{
           const prompt=await readFile(resolvePath(`prompts/daily/${name}-v2.md`),'utf8');
           for(let attempt=1;attempt<=2;attempt++){
             throwIfAborted(signal);if(calls>=config.intelligence.max_codex_calls)throw new Error('MODEL_LIMIT_STOPPED');calls++;
