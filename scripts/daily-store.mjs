@@ -270,7 +270,21 @@ export class DailyStore {
 export async function withRunLock(root, operation) {
   await mkdir(root,{recursive:true});
   const lock = path.join(path.resolve(root), '.daily-run.lock');
-  try { await mkdir(lock); } catch (error) { if (error.code === 'EEXIST') throw new Error('DAILY_RUN_LOCKED'); throw error; }
+  let acquired=false;
+  for(let attempt=0;attempt<3&&!acquired;attempt++){
+    try { await mkdir(lock); acquired=true; }
+    catch(error){
+      if(error.code!=='EEXIST')throw error;
+      let owner;
+      try{owner=JSON.parse(await readFile(path.join(lock,'owner.json'),'utf8'));}catch{throw new Error('DAILY_RUN_LOCKED');}
+      const pid=Number(owner?.pid);
+      if(!Number.isInteger(pid)||pid<=0||spawnSync('kill',['-0',String(pid)]).status===0)throw new Error('DAILY_RUN_LOCKED');
+      const stale=`${lock}.stale-${process.pid}-${Date.now()}`;
+      try{await rename(lock,stale);await rm(stale,{recursive:true,force:true});}
+      catch(renameError){if(renameError.code==='ENOENT')continue;throw new Error('DAILY_RUN_LOCKED');}
+    }
+  }
+  if(!acquired)throw new Error('DAILY_RUN_LOCKED');
   const token=randomUUID();
   const owner={pid:process.pid,token,host:hostname(),acquired_at:new Date().toISOString()};
   const ownerFile=path.join(lock,'owner.json');

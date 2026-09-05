@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -8,7 +8,7 @@ import test from 'node:test';
 import { buildAutoPublicationRequest, verifyAutoReceipt } from '../scripts/daily-publication-contracts.mjs';
 import { evaluatePublicationPolicy } from '../scripts/daily-policy.mjs';
 import { buildDraft } from '../scripts/daily-intelligence.mjs';
-import { DailyStore } from '../scripts/daily-store.mjs';
+import { DailyStore, withRunLock } from '../scripts/daily-store.mjs';
 import { executeDaily, main } from '../scripts/run-daily.mjs';
 import { XActionsMcpPublisher } from '../scripts/daily-publisher.mjs';
 import { normalizePost, sha256 } from '../scripts/daily-contracts.mjs';
@@ -214,4 +214,14 @@ test('publication receipt replay is idempotent and conflicting receipt is reject
   await store.savePublicationReceipt(receipt);
   assert.deepEqual(await store.savePublicationReceipt(receipt), receipt);
   assert.rejects(store.savePublicationReceipt({ ...receipt, provider_id: '2002', permalink: 'https://x.com/nullquanty/status/2002' }), /PUBLICATION_RECEIPT_CONFLICT/);
+});
+
+test('run lock automatically reclaims a stale dead-owner lock', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'xge-v2-stale-lock-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await mkdir(path.join(root, '.daily-run.lock'));
+  await writeFile(path.join(root, '.daily-run.lock', 'owner.json'), JSON.stringify({ pid: 999999, token: 'stale', acquired_at: '2026-09-05T00:00:00.000Z' }));
+  let entered = false;
+  await withRunLock(root, async () => { entered = true; });
+  assert.equal(entered, true);
 });
