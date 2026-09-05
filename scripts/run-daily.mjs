@@ -219,13 +219,14 @@ export async function executeDaily(options={}) {
           if(candidates.some(c=>!eligible.some(a=>a.context_index===c.context_index)))throw new Error('MODEL_UNQUALIFIED_CONTEXT');
           if(candidates.length){
             const evaluated=await stage('evaluation',{...input,drafts:candidates.map((c,i)=>({draft_index:i,context_index:c.context_index,body:c.body,action_type:c.action_type,fact_ids:c.fact_ids})),prior_bodies:prior.slice(-50)},'Array<{draft_index, scores:{context_fit,usefulness,naturalness,marx_relevance,spam_risk,repetition_risk,unsupported_claim_risk},decision,reasons}>',candidates);
-            generated=candidates.map((c,i)=>({...c,evaluation:evaluated.find(e=>e.draft_index===i)}));
+            const initialGenerated=candidates.map((c,i)=>({...c,evaluation:evaluated.find(e=>e.draft_index===i)}));
+            generated=initialGenerated.filter(candidate=>candidate.evaluation?.decision==='PUBLISHABLE');
             const regenerationFeedback=evaluated.filter(e=>e.decision==='REGENERATE').map(e=>({draft_index:e.draft_index,reasons:e.reasons,scores:e.scores}));
             if(regenerationFeedback.length&&calls+2<=config.intelligence.max_codex_calls){
               const regenerated=await stage('generation',{...input,opportunities:eligible,strategies:config.content.strategies,candidates_per_opportunity:config.intelligence.candidates_per_opportunity,prior_bodies:[...prior,...candidates.map(c=>c.body)],regeneration_feedback:regenerationFeedback},'Array<{context_index, action_type, body, strategy_family, hook_family, fact_ids}>',[],'retry1');
               if(regenerated.length){
                 const retryEvaluated=await stage('evaluation',{...input,drafts:regenerated.map((c,i)=>({draft_index:i,context_index:c.context_index,body:c.body,action_type:c.action_type,fact_ids:c.fact_ids})),prior_bodies:[...prior,...candidates.map(c=>c.body)],regeneration_feedback:regenerationFeedback},'Array<{draft_index, scores:{context_fit,usefulness,naturalness,marx_relevance,spam_risk,repetition_risk,unsupported_claim_risk},decision,reasons}>',regenerated,'retry1');
-                generated=regenerated.map((c,i)=>({...c,evaluation:retryEvaluated.find(e=>e.draft_index===i)}));
+                generated=[...generated,...regenerated.map((c,i)=>({...c,evaluation:retryEvaluated.find(e=>e.draft_index===i)}))];
               }
             }
           }
