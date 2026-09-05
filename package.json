@@ -5,8 +5,14 @@
   "type": "module",
   "description": "Bounded, read-only X research pipeline for Marx prospect discovery",
   "scripts": {
-    "check": "node --check scripts/run-comprehensive.mjs",
+    "daily": "node scripts/run-daily.mjs",
+    "review": "node scripts/review.mjs",
+    "check": "for file in scripts/*.mjs; do node --check \"$file\"; done",
     "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.24.2"
   },
   "engines": {
     "node": ">=20"

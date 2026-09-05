@@ -6,6 +6,12 @@ Use this runbook for a new bounded Marx prospect-research run. It produces a
 human-review queue from public X evidence. It does not qualify people for
 outreach and it does not perform outreach.
 
+For the experimental daily two-system path, use `npm run daily` on branch
+`experimental-x-growth-engine`. This runbook remains the legacy comprehensive
+batch contract; the daily path is documented in
+[`EXPERIMENTAL_X_GROWTH_ENGINE_PLAN.md`](EXPERIMENTAL_X_GROWTH_ENGINE_PLAN.md)
+and the repository README.
+
 ## Prerequisites
 
 - macOS or a compatible shell with Node.js and Python 3.

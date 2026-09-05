@@ -21,6 +21,12 @@ and complete-search finalization. These guarantees apply to the local batch
 controller; they do not turn it into a general web scraper or prove that the
 external MCP provider is production-ready.
 
+The experimental daily path is implemented on branch
+`experimental-x-growth-engine`. It uses a direct, allowlisted XActions MCP
+read adapter, a local SQLite control plane, Codex Exec for model stages, and a
+founder-review bundle. V1 never publishes to X; `nullquanty` is the declared
+draft account and publication is manual.
+
 ## Proposed comprehensive-run boundary
 
 - Source: `mcp__xactions__x_search_tweets`, `mcp__xactions__x_get_profile`, and
@@ -84,6 +90,55 @@ fallback only.
 The run must report `OK`, `NO_ACTION`, or `STOPPED`; an empty result is not a
 qualified-lead result. The finalizer applies the existing deterministic scorer.
 Scores are heuristics and never replace evidence review.
+
+## Daily experimental discovery and drafts
+
+The V1 command automates source preflight, rotating daily queries, bounded
+account/context enrichment, opportunity ranking, English draft generation,
+independent evaluation, deterministic anti-slop QA, duplicate checks, and
+founder-review JSON/Markdown export:
+
+```bash
+npm install
+npm test
+npm run daily -- --mode FIXTURE_DRY_RUN --fixture outputs/mcp-comprehensive-x-export.json
+# after a separate source decision and live-read preflight:
+npm run daily -- --mode EXPERIMENTAL_LIVE_READ
+npm run daily -- doctor --live-read
+npm run daily -- recover --run-id <run-id>
+npm run daily -- replay --run-id <run-id> --max-drafts 0
+npm run daily -- retention
+npm run daily -- verify-v1
+```
+
+The live mode calls only `x_search_tweets`, `x_get_profile`, `x_get_tweets`,
+`x_get_thread`, and `x_get_replies`. It never registers or invokes XActions
+write tools. Outputs are under `outputs/daily/<run-id>/`; the primary artifact
+is `founder-review.json`. Import founder decisions with:
+
+```bash
+npm run review -- --file /absolute/path/to/founder-review-decisions.json
+```
+
+See [`docs/founder-review-contract.md`](docs/founder-review-contract.md) for
+the exact hash-bound decision shape. To use a different local XActions wrapper,
+set `XGE_XACTIONS_MCP_COMMAND`; the default wrapper keeps session material in
+the macOS Keychain and outside this repository.
+
+Model-backed stages are pinned to the authenticated ChatGPT/Codex session with
+`gpt-5.6-luna`, `xhigh`, `--sandbox read-only`, and no paid model API fallback.
+The local control plane uses the system `sqlite3` CLI for its durable database;
+macOS provides this command by default. The XActions child is forced to
+`XACTIONS_MODE=local` so the daily path does not use the remote paid XActions
+backend.
+
+Optional non-secret environment overrides are documented in [`.env.example`](.env.example).
+XActions session tokens and cookies are intentionally excluded; the default
+wrapper resolves them from macOS Keychain.
+
+V1's `READY_FOR_FOUNDER_REVIEW` result is not publication evidence. The dormant
+V2 request/receipt contract is available for testing only and does not invoke a
+publisher.
 
 For the full operating procedure, read
 [`docs/runbook.md`](docs/runbook.md). For output fields and QA checks, read

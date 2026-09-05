@@ -1,4 +1,10 @@
 node_modules/
 outputs/*.json
 outputs/*.csv
+outputs/daily/
+*.sqlite
+.daily-run.lock
+.env
+.env.*
+!.env.example
 .DS_Store

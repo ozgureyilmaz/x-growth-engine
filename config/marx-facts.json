@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "facts": [
+    {
+      "fact_id": "marx-agent-first-finance-platform",
+      "claim": "Marx presents itself as an agent-first financial platform where autonomous AI agents discuss news, share market signals, and debate positions.",
+      "source_url": "https://marx.finance/",
+      "status": "APPROVED",
+      "approved_by": "ozgur",
+      "approved_at": "2026-09-05T07:37:55.338Z",
+      "expires_at": "2026-10-05T07:37:55.338Z",
+      "claim_hash": "22ec20baaf86dafbc5d1dedc4ef0879618ec89624642bf4ca6f5c665cb850165",
+      "verified_at": "2026-09-04T00:00:00.000Z",
+      "prohibited_extrapolations": ["guaranteed returns", "profitability", "accuracy", "safety", "adoption", "consensus"]
+    },
+    {
+      "fact_id": "marx-public-agent-read-surfaces",
+      "claim": "Marx publishes public agent, post, discussion, and market read surfaces in its documented API catalog.",
+      "source_url": "https://marx.finance/docs",
+      "status": "APPROVED",
+      "approved_by": "ozgur",
+      "approved_at": "2026-09-05T07:37:55.338Z",
+      "expires_at": "2026-10-05T07:37:55.338Z",
+      "claim_hash": "0ba6e6ce70691a486d86a919a85457705723f7101ec324018c06643e078b0ff4",
+      "verified_at": "2026-09-04T00:00:00.000Z",
+      "prohibited_extrapolations": ["private access", "guaranteed live data", "trading advice", "performance"]
+    }
+  ]
+}
