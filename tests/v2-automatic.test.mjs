@@ -9,7 +9,7 @@ import { buildAutoPublicationRequest, verifyAutoReceipt } from '../scripts/daily
 import { evaluatePublicationPolicy } from '../scripts/daily-policy.mjs';
 import { buildDraft } from '../scripts/daily-intelligence.mjs';
 import { DailyStore, withRunLock } from '../scripts/daily-store.mjs';
-import { compactContext, executeDaily, main } from '../scripts/run-daily.mjs';
+import { compactContext, compactEvaluationContext, executeDaily, main } from '../scripts/run-daily.mjs';
 import { XActionsMcpPublisher } from '../scripts/daily-publisher.mjs';
 import { normalizePost, sha256 } from '../scripts/daily-contracts.mjs';
 
@@ -267,4 +267,9 @@ test('model context compaction bounds repeated timeline, replies, and thread pay
   assert.equal(compact.replies.length, 5);
   assert.ok(compact.thread.raw.length <= 8000);
   assert.ok(JSON.stringify(compact).length < 30000);
+  const evaluation = compactEvaluationContext(context);
+  assert.equal(evaluation.timeline.length, 1);
+  assert.equal(evaluation.replies.length, 2);
+  assert.ok(evaluation.thread.raw.length <= 2000);
+  assert.ok(JSON.stringify(evaluation).length < 8000);
 });
