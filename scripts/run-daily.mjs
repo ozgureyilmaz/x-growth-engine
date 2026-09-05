@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
@@ -97,14 +97,23 @@ export async function executeDaily(options={}) {
       progress(key);const result=(await operation())??null;throwIfAborted(signal);
       await store.checkpoint(runId,key,hash,result);return result;
     };
-    const callSource=async(tool,key,args,operation)=>step(key,args,async()=>{
-      for(let attempt=1;attempt<=config.discovery.retry_transient_attempts+1;attempt++){
+    const callSource=async(tool,key,args,operation,retryAttempts=config.discovery.retry_transient_attempts)=>step(key,args,async()=>{
+      for(let attempt=1;attempt<=retryAttempts+1;attempt++){
         throwIfAborted(signal);const started=nowIso();
         await store.saveEvent(runId,'X_SOURCE_STARTED',{tool,args_hash:sha256(args),attempt},`${runId}:${key}:${started}`);
         try{const value=await operation();await store.saveSourceCall(runId,tool,'SUCCEEDED',started,nowIso(),Array.isArray(value)?value.length:1);return value;}
-        catch(e){const code=signal.aborted?errorCode(signal.reason):errorCode(e);await store.saveSourceCall(runId,tool,'FAILED',started,nowIso(),0,code);if(code!=='RUNTIME_FAILURE'||attempt>config.discovery.retry_transient_attempts)throw e;await delay(500*attempt,signal);}
+        catch(e){const code=signal.aborted?errorCode(signal.reason):errorCode(e);await store.saveSourceCall(runId,tool,'FAILED',started,nowIso(),0,code);if(code!=='RUNTIME_FAILURE'||attempt>retryAttempts)throw e;await delay(500*attempt,signal);}
       }
     });
+    const optionalSource=async(tool,key,args,operation,fallback)=>{
+      try{return {value:await callSource(tool,key,args,operation,1),error:null};}
+      catch(error){
+        const code=signal.aborted?errorCode(signal.reason):errorCode(error);
+        if(!['RUNTIME_FAILURE','INVALID_RESPONSE','SOURCE_TIMEOUT'].includes(code))throw error;
+        await store.saveEvent(runId,'X_SOURCE_OPTIONAL_FAILURE',{tool,error_code:code},`${runId}:${key}:optional-failure`);
+        return {value:fallback,error:code};
+      }
+    };
     try{
       const fixtureDryRun=mode==='FIXTURE_DRY_RUN'||(autoMode&&options.dryRun&&options.fixture);
       if(maxDrafts>0&&!fixtureDryRun){facts=await approvedFacts(config);if(!facts.length)throw new Error('MARX_FACT_REGISTRY_NOT_APPROVED');}
@@ -139,7 +148,7 @@ export async function executeDaily(options={}) {
         const ranked=[...posts.values()].map(post=>({post,score:scoreOpportunity(post).score})).filter(p=>p.score>=config.discovery.min_opportunity_score).sort((a,b)=>b.score-a.score||(b.post.likes+b.post.reposts)-(a.post.likes+a.post.reposts)||a.post.provider_id.localeCompare(b.post.provider_id)).slice(0,Math.min(config.discovery.max_contexts,config.intelligence.max_opportunities));
         const accountCache=new Map();
         for(const {post} of ranked){
-          let account=null,timeline=[],replies=[],thread=null;
+          let account=null,timeline=[],replies=[],thread=null;const contextErrors=[];
           if(source){
             if(!accountCache.has(post.username)){
               if(accountCache.size>=config.discovery.max_enriched_accounts)break;
@@ -148,11 +157,11 @@ export async function executeDaily(options={}) {
               accountCache.set(post.username,{account:account||null,timeline});if(account)await store.saveAccount(runId,account);
             }
             ({account,timeline}=accountCache.get(post.username));
-            replies=await callSource('x_get_replies',`replies:${post.provider_id}`,{url:post.url,limit:20},()=>source.replies(post.url,20));
-            const threadValue=await callSource('x_get_thread',`thread:${post.provider_id}`,{url:post.url},()=>source.thread(post.url));
+            const replyResult=await optionalSource('x_get_replies',`replies:${post.provider_id}`,{url:post.url,limit:20},()=>source.replies(post.url,20),[]);replies=replyResult.value;if(replyResult.error)contextErrors.push({tool:'x_get_replies',error_code:replyResult.error});
+            const threadResult=await optionalSource('x_get_thread',`thread:${post.provider_id}`,{url:post.url},()=>source.thread(post.url),{raw:null,retrieved_at:nowIso(),completeness:'unavailable'});const threadValue=threadResult.value;if(threadResult.error)contextErrors.push({tool:'x_get_thread',error_code:threadResult.error});
             thread={retrieved_at:threadValue?.retrieved_at,completeness:threadValue?.completeness??'unknown',raw:JSON.stringify(threadValue?.raw??'').slice(0,32768)};
           }
-          const material={post,account,timeline,replies,thread,completeness:source?'sampled':'post_only',source_mode:mode};
+          const material={post,account,timeline,replies,thread,context_errors:contextErrors,completeness:source?(contextErrors.length?'partial':'sampled'):'post_only',source_mode:mode};
           contexts.push({...material,context_hash:sha256(material)});
         }
       }
@@ -234,6 +243,7 @@ export async function executeDaily(options={}) {
       const bundle={schema_version:'1.0',message_type:'X_FOUNDER_REVIEW_BUNDLE',run_id:runId,mode,generated_at:nowIso(),source_contexts:[...posts.values()].map(p=>({provider_id:p.provider_id,url:p.url,username:p.username,text:p.text,timestamp:p.timestamp})),context_details:contexts,facts,decisions,drafts:selected,no_action_count:decisions.filter(d=>d.action_type==='NO_ACTION').length,source_health:health,status,model_calls:calls,publisher_enabled:autoMode&&config.publisher.enabled,publication:autoMode?publication:undefined};
       throwIfAborted(signal);await store.writeReviewBundle(path.join(out,'founder-review.json'),bundle);await writeFile(path.join(out,'founder-review.md'),markdownBundle(bundle),{mode:0o600});
       if(autoMode)await atomicJson(path.join(out,'auto-summary.json'),{schema_version:'2.0',message_type:'X_AUTO_PUBLISH_SUMMARY',run_id:runId,mode,status,dry_run:publication.dry_run,...publication,publication,generated_at:nowIso()});
+      await rm(path.join(out,'failure.json'),{force:true});
       await store.finishRun(runId,status,nowIso());
       return{run_id:runId,status,mode,source_health:health,discovered:posts.size,drafts:selected.length,no_action:bundle.no_action_count,model_calls:calls,output_dir:out,publisher_enabled:autoMode&&config.publisher.enabled,publication:autoMode?publication:undefined};
     }catch(e){

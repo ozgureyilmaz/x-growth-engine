@@ -174,11 +174,13 @@ test('automatic pipeline publishes policy-approved drafts without founder review
   config.facts_path = path.join(root, 'facts.json');
   const now = new Date('2026-09-05T10:00:00.000Z');
   const post = normalizePost({ id: '1001', username: 'builder', text: 'Building an AI trading agent', timestamp: '2026-09-05T09:00:00.000Z', url: 'https://x.com/builder/status/1001', likes: 8, retweets: 2, replies: 1 }, 'q', 'bucket', now.toISOString());
-  const source = { preflight: async () => ({ status: 'passed', result_count: 1 }), search: async () => [post], profile: async () => undefined, timeline: async () => [], replies: async () => [], thread: async () => ({ raw: null, completeness: 'unknown', retrieved_at: now.toISOString() }), close: async () => {} };
+  const source = { preflight: async () => ({ status: 'passed', result_count: 1 }), search: async () => [post], profile: async () => undefined, timeline: async () => [], replies: async () => { throw new Error('localTools.getPage is not a function'); }, thread: async () => ({ raw: null, completeness: 'unknown', retrieved_at: now.toISOString() }), close: async () => {} };
   const publisher = { publishAndVerify: async () => ({ status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001' }), close: async () => {} };
   const result = await executeDaily({ config, mode: 'EXPERIMENTAL_LIVE_AUTO', source, publisher, maxActions: 1, runId: 'auto_publish_run', now, queryConfig: { language: 'en', buckets: { bucket: ['"AI trading agent"'] } }, modelRunner: async (stage) => stage === 'opportunity' ? [{ context_index: 0, opportunity_score: 0.9, confidence: 0.9, recommended_action_type: 'REPLY_DRAFT', reason: 'specific builder problem' }] : stage === 'generation' ? [{ context_index: 0, action_type: 'REPLY_DRAFT', body: 'For this trading agent, log failed fills first. Marx can make those assumptions inspectable.', strategy_family: 'EVIDENCE_AND_PROVENANCE', hook_family: 'specific_context', fact_ids: ['marx-agent-first-finance-platform'] }] : [{ draft_index: 0, scores: { context_fit: 0.9, usefulness: 0.9, naturalness: 0.9, marx_relevance: 0.9, spam_risk: 0.01, repetition_risk: 0.01, unsupported_claim_risk: 0.01 }, decision: 'PUBLISHABLE', reasons: ['specific'] }] });
   assert.equal(result.status, 'AUTO_PUBLISHED');
   assert.equal(result.publication.published, 1);
+  const bundle = JSON.parse(await readFile(path.join(root, 'auto_publish_run', 'founder-review.json'), 'utf8'));
+  assert.equal(bundle.context_details[0].context_errors[0].error_code, 'RUNTIME_FAILURE');
   assert.equal((await new DailyStore(config.storage.database, config.storage.events).listPublicationRequests('auto_publish_run'))[0].status, 'PUBLISHED');
 });
 

@@ -56,6 +56,10 @@ The run performs discovery, context enrichment, Codex opportunity analysis,
 strategy-diverse generation, independent evaluation, deterministic QA, the
 publication policy gate, write, read-back, and receipt persistence.
 
+Replies and thread reads are optional context enrichments. A known runtime or
+timeout failure on either helper is recorded as partial context and the run
+continues; authentication, challenge, and rate-limit failures remain fatal.
+
 The control search is retried within the configured transient retry budget when
 XActions returns an empty control result. Persistent empty or failed control
 checks still stop the run before any draft or write action.
