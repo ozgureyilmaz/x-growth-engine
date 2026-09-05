@@ -121,7 +121,11 @@ export async function executeDaily(options={}) {
       }else{
         source=options.source||(fixtureDryRun?new FixtureXSource(options.fixture||{search_results:[]}):new XActionsMcpSource({command:config.source.command,args:config.source.args,readTools:config.source.read_tools,callTimeoutMs:config.discovery.call_timeout_ms,delayMs:config.discovery.inter_call_delay_seconds*1000,signal}));
         const query=`the lang:en since:${since.slice(0,10)}`;
-        const control=await callSource('x_search_tweets','control',{query,limit:1},()=>source.preflight(query));
+        let control=await callSource('x_search_tweets','control',{query,limit:1},()=>source.preflight(query));
+        for(let attempt=1;control.status==='empty'&&attempt<=config.discovery.retry_transient_attempts;attempt++){
+          await delay(500*attempt,signal);
+          control=await callSource('x_search_tweets',`control:retry:${attempt}`,{query,limit:1,attempt},()=>source.preflight(query));
+        }
         if(control.status!=='passed')throw new Error('CONTROL_CHECK_EMPTY');health='PASSED';
         for(const q of buildDailyQueries(queries,now,config.discovery.queries_per_run,config.discovery.lookback_hours)){
           const result=await callSource('x_search_tweets',`search:${q.bucket}`,q,()=>source.search(q.query,q.bucket,config.discovery.result_limit_per_query,since.slice(0,10)));

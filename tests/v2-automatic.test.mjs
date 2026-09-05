@@ -225,3 +225,14 @@ test('run lock automatically reclaims a stale dead-owner lock', async (t) => {
   await withRunLock(root, async () => { entered = true; });
   assert.equal(entered, true);
 });
+
+test('automatic control preflight retries a transient empty result', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'xge-v2-control-retry-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const config = autoConfig(root);
+  let calls = 0;
+  const source = { preflight: async () => (++calls === 1 ? { status: 'empty', result_count: 0 } : { status: 'passed', result_count: 1 }), search: async () => [], close: async () => {} };
+  const result = await executeDaily({ config, mode: 'EXPERIMENTAL_LIVE_AUTO', source, dryRun: true, maxActions: 0, runId: 'control_retry_run', now: new Date('2026-09-05T10:00:00.000Z'), queryConfig: { language: 'en', buckets: { bucket: ['"AI trading agent"'] } } });
+  assert.equal(result.status, 'DISCOVERY_COMPLETE');
+  assert.equal(calls, 2);
+});

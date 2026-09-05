@@ -56,6 +56,10 @@ The run performs discovery, context enrichment, Codex opportunity analysis,
 strategy-diverse generation, independent evaluation, deterministic QA, the
 publication policy gate, write, read-back, and receipt persistence.
 
+The control search is retried within the configured transient retry budget when
+XActions returns an empty control result. Persistent empty or failed control
+checks still stop the run before any draft or write action.
+
 ## Policy gate
 
 An action is publishable only when its action/body hashes, account, target,
