@@ -31,6 +31,11 @@ Rules:
    result is not publication evidence.
 7. Return only one JSON object with `message_type` `X_PUBLICATION_RECEIPT`.
 
+For V2 canary execution, use one `browser_exec` call containing the complete
+navigation, account check, action, and read-back sequence. Do not fall back to
+terminal, `execute_code`, `skill_view`, `read_file`, or repeated browser calls;
+return `RECONCILIATION_REQUIRED` if the single browser call cannot complete.
+
 Receipt shape:
 
 ```json
