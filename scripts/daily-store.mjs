@@ -204,11 +204,13 @@ export class DailyStore {
     const leaseMs = Number.isFinite(options.leaseMs) ? Math.max(1000, Number(options.leaseMs)) : 900000;
     const leaseExpires = new Date(Date.now() + leaseMs).toISOString();
     const ownerSql = ownerToken ? quote(ownerToken) : 'NULL';
-    runSql(this.database, `BEGIN IMMEDIATE;
+    const claimedRows = runSql(this.database, `BEGIN IMMEDIATE;
       UPDATE publication_requests
       SET status='CLAIMED',claimed_at=COALESCE(claimed_at,${quote(now)}),updated_at=${quote(now)},owner_token=${ownerSql},lease_expires_at=${quote(leaseExpires)},dispatch_started_at=${quote(now)},attempt_count=COALESCE(attempt_count,0)+1
-      WHERE request_id=${quote(requestId)} AND (status='PENDING' OR (status='CLAIMED' AND owner_token=${ownerSql} AND lease_expires_at < ${quote(now)}));
-      COMMIT;`);
+      WHERE request_id=${quote(requestId)} AND status='PENDING'
+      RETURNING request_id;
+      COMMIT;`, true);
+    if (!claimedRows.length) return undefined;
     const row = runSql(this.database, `SELECT request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,claimed_at,updated_at,owner_token,lease_expires_at,dispatch_started_at,attempt_count,payload_json FROM publication_requests WHERE request_id=${quote(requestId)};`, true)[0];
     if (ownerToken && row?.status === 'CLAIMED' && row.owner_token !== ownerToken) return undefined;
     return row ? { ...row, payload: JSON.parse(row.payload_json) } : undefined;
@@ -218,6 +220,19 @@ export class DailyStore {
     await this.init();
     const row = runSql(this.database, `SELECT request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,claimed_at,updated_at,owner_token,lease_expires_at,dispatch_started_at,attempt_count,payload_json FROM publication_requests WHERE request_id=${quote(requestId)};`, true)[0];
     return row ? { ...row, payload: JSON.parse(row.payload_json) } : undefined;
+  }
+
+  async retryConfirmedPreActionFailure(requestId) {
+    await this.init();
+    const row=runSql(this.database,`SELECT r.status,r.attempt_count,c.payload_json FROM publication_requests r JOIN publication_receipts c USING(request_id) WHERE request_id=${quote(requestId)};`,true)[0];
+    const receipt=row && JSON.parse(row.payload_json);
+    if(row?.status!=='FAILED'||row.attempt_count!==1||receipt?.error_code!=='BROWSER_EXECUTION_FAILED'||!/^ACCOUNT_VERIFIED:/.test(receipt?.error_message||''))throw new Error('PRE_ACTION_RECOVERY_NOT_PROVEN');
+    runSql(this.database,`BEGIN IMMEDIATE;
+      CREATE TABLE IF NOT EXISTS publication_receipt_history(request_id TEXT NOT NULL,attempt INTEGER NOT NULL,payload_json TEXT NOT NULL,PRIMARY KEY(request_id,attempt));
+      INSERT INTO publication_receipt_history VALUES(${quote(requestId)},1,${quote(row.payload_json)});
+      DELETE FROM publication_receipts WHERE request_id=${quote(requestId)};
+      UPDATE publication_requests SET status='PENDING',owner_token=NULL,lease_expires_at=NULL WHERE request_id=${quote(requestId)} AND status='FAILED';
+      COMMIT;`);
   }
 
   async savePublicationReceipt(value, options = {}) {

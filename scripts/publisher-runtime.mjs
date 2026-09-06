@@ -53,14 +53,14 @@ export async function checkPublisherRuntime(config = {}) {
   if (version.error || version.status !== 0) throw new Error('BROWSER_USE_BINARY_UNAVAILABLE');
   result.browser_use = String(version.stdout || version.stderr || '').trim().slice(0, 160);
   const health = spawnSync(executable, [], {
-    input: `new_tab("https://x.com/home")\nwait_for_load()\nprint(page_info())\nprint(js("document.body.innerText.slice(0,4000)"))\n`,
+    input: `import time,json\nnew_tab("https://x.com/home")\nwait_for_load()\ndeadline=time.monotonic()+30\naccount=False\nwhile time.monotonic()<deadline:\n    account=js("(() => {const e=document.querySelector('[data-testid=\\\"SideNav_AccountSwitcher_Button\\\"]');return !!e && /(^|\\\\s)@nullquanty($|\\\\s)/i.test(e.innerText)})()")\n    if account: break\n    time.sleep(.5)\nprint(json.dumps({"account": "nullquanty" if account else None}))\n`,
     encoding: 'utf8',
-    timeout: browser.health_timeout_ms ?? 10000,
+    timeout: 45000,
     env: { PATH: process.env.PATH, HOME: process.env.HOME, BU_CDP_WS: cdpUrl, BU_NAME: `xge_health_${process.pid}` },
   });
   const healthOutput = `${health.stdout ?? ''}\n${health.stderr ?? ''}`;
   if (health.error || health.status !== 0) throw new Error('BROWSER_USE_HEALTH_FAILED');
-  if (!new RegExp(`@?${browser.expected_account}`, 'i').test(healthOutput)) throw new Error('BROWSER_ACCOUNT_MISMATCH');
+  if (!healthOutput.includes('"account": "nullquanty"')) throw new Error('BROWSER_ACCOUNT_MISMATCH');
   result.account = browser.expected_account;
   return result;
 }
@@ -69,7 +69,7 @@ export function publisherRuntimeEnv(config = {}) {
   const browser = config.publisher?.browser ?? {};
   const cdpUrl = process.env.XGE_CDP_WS || browser.cdp_url;
   return {
-    ...(cdpUrl ? { BU_CDP_WS: cdpUrl, XGE_CDP_WS: cdpUrl } : {}),
+    ...(cdpUrl ? { BU_CDP_WS: cdpUrl, BROWSER_CDP_URL: cdpUrl, XGE_CDP_WS: cdpUrl } : {}),
     BU_NAME: `xpub_worker_${process.pid}`,
   };
 }

@@ -88,7 +88,7 @@ test('publication ledger claims each automatic request once and stores receipt s
   await store.saveDraft('auto-run', action, 'PENDING');
   await store.createPublicationRequest(request);
   assert.equal((await store.claimPublicationRequest(request.request_id)).status, 'CLAIMED');
-  assert.equal((await store.claimPublicationRequest(request.request_id)).status, 'CLAIMED');
+  assert.equal(await store.claimPublicationRequest(request.request_id), undefined);
   await store.savePublicationReceipt({ schema_version: '2.0', message_type: 'X_PUBLICATION_RECEIPT', request_id: request.request_id, action_id: action.action_id, publisher_account: 'nullquanty', idempotency_key: request.idempotency_key, action_hash: request.action_hash, request_hash: request.request_hash, status: 'PUBLISHED', provider_id: '2001', permalink: 'https://x.com/nullquanty/status/2001', observed_at: '2026-09-05T10:01:00.000Z' });
   assert.equal((await store.listPublicationRequests('auto-run'))[0].status, 'PUBLISHED');
 });

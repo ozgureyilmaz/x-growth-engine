@@ -4,7 +4,8 @@ import { mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promise
 import path from 'node:path';
 import { AutoPublicationReceiptSchema, AutoPublicationRequestSchema, verifyAutoReceipt } from './daily-publication-contracts.mjs';
 import { DailyStore } from './daily-store.mjs';
-import { errorCode, loadConfig, resolvePath } from './daily-runtime.mjs';
+import { errorCode, loadConfig, resolvePath, approvedFacts } from './daily-runtime.mjs';
+import { evaluatePublicationPolicy } from './daily-policy.mjs';
 import { HermesXPublisher } from './hermes-x-publisher.mjs';
 import { checkPublisherRuntime, publisherRuntimeEnv } from './publisher-runtime.mjs';
 
@@ -75,6 +76,14 @@ export async function publishRequestFile(requestPath, options = {}) {
   const absolute = path.resolve(requestPath);
   const request = await readRequest(absolute);
   const config = options.config ?? await loadConfig(options.configPath ?? resolvePath('config/daily-v2.json'));
+  if (!options.publisher) {
+    if(config.publisher.enabled!==true || config.publisher.kill_switch || /^(1|true|yes)$/i.test(process.env.XGE_PUBLISHER_KILL_SWITCH||''))throw new Error('PUBLISHER_DISABLED');
+    if(Date.parse(request.grant.expires_at)<=Date.now())throw new Error('PUBLICATION_GRANT_EXPIRED');
+    const policy=evaluatePublicationPolicy(request.action,config,{facts:await approvedFacts(config)});
+    if(policy.decision!=='ALLOW'||policy.policy_hash!==request.authorization.policy_hash)throw new Error('PUBLICATION_POLICY_CHANGED');
+    verifyAutoReceipt(request,receiptFor(request,{status:'FAILED'}));
+    await checkPublisherRuntime(config);
+  }
   const spoolRoot = options.spoolPath ?? path.dirname(path.dirname(absolute));
   const receiptPath = options.receiptPath ?? path.join(spoolRoot, 'receipts', `publication-receipt-${request.request_id}.json`);
   const store = options.store ?? (options.database ? new DailyStore(options.database, options.events) : undefined);
@@ -112,7 +121,7 @@ export async function drainSpool(spoolPath, options = {}) {
   const store = options.store ?? new DailyStore(options.database ?? resolvePath(config.storage.database), options.events ?? resolvePath(config.storage.events));
   await store.init();
   const ownerToken = options.ownerToken || `publisher_${process.pid}_${randomUUID()}`;
-  const files = (await readdir(pending)).filter(file => file.endsWith('.json')).sort();
+  const files = (await readdir(pending)).filter(file => file.endsWith('.json') && !file.endsWith('.execution.json')).sort();
   const results = [];
   for (const file of files) {
     const requestPath = path.join(pending, file);
@@ -158,6 +167,8 @@ export async function main(argv = process.argv.slice(2)) {
       const store = new DailyStore(resolvePath(config.storage.database), resolvePath(config.storage.events));
       await store.init();
       const request = await readRequest(values.request);
+      await checkPublisherRuntime(config);
+      if(Date.parse(request.grant.expires_at)<=Date.now())throw new Error('PUBLICATION_GRANT_EXPIRED');
       const claim = await store.claimPublicationRequest(request.request_id, { ownerToken: token, leaseMs: config.publisher.worker_lease_ms });
       if (!claim) throw new Error('PUBLICATION_CLAIM_UNAVAILABLE');
       return publishRequestFile(values.request, { config, ownerToken: token, requireClaim: true, store, spoolPath: resolvePath(config.publisher.worker_spool), receiptPath: path.join(resolvePath(config.publisher.worker_spool), 'receipts', `publication-receipt-${request.request_id}.json`) });
