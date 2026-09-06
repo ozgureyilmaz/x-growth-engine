@@ -54,10 +54,15 @@ export function runHermesCli(requestPath, options={}) {
   const reasoning=options.reasoningEffort||'xhigh';
   const timeoutMs=options.timeoutMs||180000;
   const actionId=String(options.actionId||path.basename(requestPath,'.json')).replace(/[^a-zA-Z0-9_-]/g,'_');
+  const actionType=String(options.actionType||'');
+  const targetUrl=String(options.targetUrl||'');
+  const body=String(options.body||'');
   const prompt=[
     'Execute exactly one X_PUBLICATION_REQUEST JSON file using the browser tool.',
     `REQUEST_PATH: ${requestPath}`,
     `Use a fresh browser session named xpub_${actionId.slice(-12)}; do not reuse a generic or prior session.`,
+    `The engine already validated the request. Do not call skill_view or read_file. ACTION_TYPE: ${actionType}. TARGET_URL: ${targetUrl}. EXACT_BODY: ${body}`,
+    'Use exactly one browser action for this request, then perform visible read-back and return the receipt. Do not generate, rewrite, or improve the body.',
     'Use the request body and target exactly. Verify the signed-in account is @nullquanty. Do not ask for or print API keys, cookies, auth_token, or ct0. Do not use X API tools. Return only one X_PUBLICATION_RECEIPT JSON object after visible read-back verification. If the result is uncertain, return RECONCILIATION_REQUIRED and never retry.',
   ].join('\n');
   const args=buildHermesArgs(prompt,{model,reasoning,timeoutMs});
@@ -84,7 +89,7 @@ export function runHermesCli(requestPath, options={}) {
 export function buildHermesArgs(prompt, options={}) {
   // Hermes' managed Browser Use backend is exposed through the full tool registry;
   // the legacy `browser` group omits browser_exec when the backend is selected.
-  return ['chat','-Q','--provider','openai-codex','-m',options.model||'gpt-5.6-luna','--reasoning',options.reasoning||'xhigh','--toolsets','all','--skills','x-growth-publisher','--max-turns','20','--run-budget',String(Math.ceil((options.timeoutMs||180000)/1000)),'-q',prompt];
+  return ['chat','-Q','--provider','openai-codex','-m',options.model||'gpt-5.6-luna','--reasoning',options.reasoning||'xhigh','--toolsets','all','--skills','x-growth-publisher','--max-turns','10','--run-budget',String(Math.ceil((options.timeoutMs||180000)/1000)),'-q',prompt];
 }
 
 export class HermesXPublisher {
@@ -95,7 +100,7 @@ export class HermesXPublisher {
   async publishRequest(requestPath) {
     const request=AutoPublicationRequestSchema.parse(JSON.parse(await readFile(path.resolve(requestPath),'utf8')));
     let raw;
-    try { raw=await (this.options.runHermes||((file)=>runHermesCli(file,{...this.options,actionId:request.action.action_id})))(path.resolve(requestPath)); }
+    try { raw=await (this.options.runHermes||((file)=>runHermesCli(file,{...this.options,actionId:request.action.action_id,actionType:request.action.action_type,targetUrl:request.action.target?.post_url||'',body:request.action.body})))(path.resolve(requestPath)); }
     catch(error) {
       const detail=String(error?.message||'Hermes returned no verified receipt.').replace(/[\r\n]+/g,' ').slice(-800);
       return {...receiptBase(request),status:'RECONCILIATION_REQUIRED',error_code:errorCode(error),error_message:detail,observed_at:new Date().toISOString()};
