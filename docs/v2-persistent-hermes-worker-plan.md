@@ -66,7 +66,8 @@ real X permalink/provider ID through a separately reviewed command.
 expected account `nullquanty`. Worker mode requires health checking. Supply the
 current owned CDP WebSocket endpoint through `XGE_CDP_WS` (the loader injects it
 into the config without printing it). The health gate checks `/json/version`
-and the Browser Use binary before any write request. The worker passes the
+and the Browser Use binary before any write request, then runs a read-only
+`page_info()` check that must identify `nullquanty`. The worker passes the
 endpoint through `BU_CDP_WS` and a worker-scoped `BU_NAME`; it does not use
 global `agent-browser close --all` cleanup or broad process matching.
 
