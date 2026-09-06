@@ -29,9 +29,10 @@ draft account and publication is manual.
 
 V2 automatic publication is implemented behind the separate
 `config/daily-v2.json` configuration and the explicit `npm run daily -- auto`
-command. It keeps V1 manual-safe defaults unchanged and publishes only actions
-that pass the deterministic V2 policy gate, then verifies each result through
-read-back and stores a versioned receipt.
+command. Worker mode keeps the daily run as a queue producer; the serialized
+`npm run publisher -- drain|watch` worker owns Browser Use/CDP, Hermes
+`gpt-5.6-luna`/`xhigh`, visible read-back, and versioned receipts. It publishes
+only actions that pass the deterministic V2 policy gate.
 
 ## Proposed comprehensive-run boundary
 

@@ -16,13 +16,17 @@ flowchart LR
   K --> M[V1 manual publication]
   K -. V2 automatic .-> N[Automated policy gate]
   N --> O[Hash-bound publication request]
-  O --> P[Hermes publisher agent<br/>gpt-5.6-luna / xhigh]
-  P --> Q[Authenticated X account action<br/>browser tool]
-  Q --> R[Hermes JSON receipt]
+  O --> P[SQLite PENDING + spool JSON]
+  P --> Q[Serialized publisher worker<br/>one lease / one action]
+  Q --> R[CDP + Browser Use health gate]
+  R --> S[Hermes publisher<br/>gpt-5.6-luna / xhigh]
+  S --> T[Authenticated X account action<br/>browser tool]
+  T --> U[Visible read-back + hash-bound receipt]
 ```
 
 System 1 owns bounded XActions reads and durable evidence. System 2 owns all
 analysis, policy decisions, and V2 publication requests. Codex model workers
-have no MCP tools and no publisher credentials; Hermes owns the three configured
-publication actions through its browser publisher skill. V1 ends at founder review, while V2 requires
-the explicit `auto` command and separate automatic configuration.
+have no MCP tools and no publisher credentials; the serialized worker owns the
+Hermes/browser transport and the three configured publication actions. V1 ends
+at founder review, while V2 requires the explicit `auto` command and separate
+automatic configuration.

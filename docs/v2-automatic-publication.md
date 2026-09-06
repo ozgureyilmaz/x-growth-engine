@@ -2,8 +2,8 @@
 
 V2 runs the V1 discovery and intelligence pipeline and publishes eligible
 `POST_DRAFT`, `REPLY_DRAFT`, and `QUOTE_DRAFT` actions without a founder review
-step. The engine owns the policy gate and request spool; Hermes is the publisher
-agent and also the external clock that invokes the explicit `auto` command.
+step. The engine owns the policy gate and request spool; a serialized worker
+owns Hermes and the Browser Use/CDP session.
 
 ## Configuration
 
@@ -17,6 +17,7 @@ manual-safe configuration:
     "enabled": true,
     "mode": "AUTOMATIC",
     "kill_switch": false,
+    "dispatch_mode": "WORKER",
     "max_actions_per_run": 5
   }
 }
@@ -25,6 +26,9 @@ manual-safe configuration:
 The configured XActions wrapper loads session material through macOS Keychain.
 Do not put cookies, `auth_token`, `ct0`, or bearer tokens in `.env`, command
 arguments, JSON artifacts, or Hermes prompts.
+
+Worker mode requires a live owned Chrome CDP endpoint. Supply it only through
+`XGE_CDP_WS`; the health gate checks Browser Use/CDP before any write.
 
 Set `XGE_PUBLISHER_KILL_SWITCH=1` (or `true`/`yes`) for an immediate fail-closed
 stop without editing the V2 config. The override never enables publishing; it
@@ -42,10 +46,24 @@ npm run daily -- auto --config config/daily-v2.json --max-actions 1 --dry-run
 Dry-run writes the exact V2 request JSON and audit bundle, but never calls a
 write tool.
 
-## Automatic run
+## Queue and publisher worker
 
 ```bash
 npm run daily -- auto --config config/daily-v2.json --max-actions 5
+```
+
+Drain the exact queued requests with one serialized worker:
+
+```bash
+XGE_CDP_WS='ws://127.0.0.1:9222/devtools/browser/<current-id>' \
+npm run publisher -- drain --config config/daily-v2.json
+```
+
+For a long-lived host process, use `watch`; keep only one worker owner:
+
+```bash
+XGE_CDP_WS='ws://127.0.0.1:9222/devtools/browser/<current-id>' \
+npm run publisher -- watch --config config/daily-v2.json
 ```
 
 `--max-actions` can lower the configured cap but cannot raise it. The command
@@ -54,7 +72,8 @@ stderr so Hermes can parse the result safely.
 
 The run performs discovery, context enrichment, Codex opportunity analysis,
 strategy-diverse generation, independent evaluation, deterministic QA, the
-publication policy gate, write, read-back, and receipt persistence.
+publication policy gate, and request queueing. The worker performs the write,
+read-back, and receipt persistence.
 
 V2 ranks up to 12 contexts from up to 20 enriched accounts and 12 opportunity
 records, while the final publication cap remains five actions per run. If the

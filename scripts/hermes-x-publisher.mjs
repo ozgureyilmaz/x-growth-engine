@@ -9,7 +9,8 @@ function receiptBase(request) {
   return { schema_version:'2.0',message_type:'X_PUBLICATION_RECEIPT',request_id:request.request_id,action_id:request.action.action_id,publisher_account:request.publisher_account,idempotency_key:request.idempotency_key,action_hash:request.action_hash,request_hash:request.request_hash,observed_at:new Date().toISOString() };
 }
 
-function closeStalePublisherSession(pathValue, env) {
+function closeStalePublisherSession(pathValue, env, enabled = false) {
+  if (!enabled) return;
   // Clear Hermes-owned sessions before dispatch so a preflight or timed-out
   // worker cannot leave a dead CDP endpoint cached for the publisher.
   const npx = process.env.NPX_BIN || 'npx';
@@ -79,10 +80,14 @@ export function runHermesCli(requestPath, options={}) {
     for (const key of ['USER','LOGNAME','SHELL','TMPDIR','XDG_CONFIG_HOME','XDG_CACHE_HOME','XDG_DATA_HOME','XDG_RUNTIME_DIR','HERMES_HOME']) {
       if (process.env[key]) safeEnv[key]=process.env[key];
     }
-    closeStalePublisherSession(options.cwd, safeEnv);
-    const child=spawn(command,args,{cwd:options.cwd,stdio:['ignore','pipe','pipe'],env:safeEnv});
+    for (const key of ['BU_CDP_WS', 'BU_NAME', 'BROWSER_USE_CDP_URL', 'XGE_CDP_WS']) {
+      if (options.runtimeEnv?.[key]) safeEnv[key] = String(options.runtimeEnv[key]);
+    }
+    closeStalePublisherSession(options.cwd, safeEnv, options.allowStaleCleanup === true);
+    const child=spawn(command,args,{cwd:options.cwd,stdio:['ignore','pipe','pipe'],env:safeEnv,detached:true});
+    const terminate=signal=>{try{process.kill(-child.pid,signal);}catch{try{child.kill(signal);}catch{/* already exited */}}};
     let stdout='',stderr='',settled=false;
-    const timer=setTimeout(()=>{if(settled)return;settled=true;child.kill('SIGTERM');setTimeout(()=>child.kill('SIGKILL'),5000);reject(new Error('HERMES_TIMEOUT'));},timeoutMs);
+    const timer=setTimeout(()=>{if(settled)return;settled=true;terminate('SIGTERM');setTimeout(()=>terminate('SIGKILL'),5000);reject(new Error('HERMES_TIMEOUT'));},timeoutMs);
     child.stdout.on('data',chunk=>{stdout+=chunk.toString();if(stdout.length>2_000_000){settled=true;child.kill('SIGTERM');reject(new Error('HERMES_OUTPUT_TOO_LARGE'));}});
     child.stderr.on('data',chunk=>{stderr=(stderr+chunk.toString()).slice(-12000);});
     child.once('error',error=>{if(settled)return;settled=true;clearTimeout(timer);reject(error);});

@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { DailyStore, withRunLock } from './daily-store.mjs';
 import { XActionsMcpSource } from './daily-source.mjs';
+import { checkPublisherRuntime } from './publisher-runtime.mjs';
 
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
 const CONFIG_PATH = path.join(ROOT, 'config/daily-experiment.json');
@@ -46,7 +47,10 @@ export async function doctor(options = {}) {
     checks.hermes_binary=commandPresent(hermesCommand(),['--help']);
     checks.hermes_skill=await access(path.join(ROOT,'hermes/skills/x-growth-publisher/SKILL.md')).then(()=>true).catch(()=>false);
     checks.hermes_model='gpt-5.6-luna'; checks.hermes_reasoning_effort='xhigh';
-    checks.publisher_preflight=checks.hermes_binary&&checks.hermes_skill?{status:'passed',transport:'hermes_cli',model:checks.hermes_model,reasoning_effort:checks.hermes_reasoning_effort,skill:'x-growth-publisher'}:{status:'failed',error:checks.hermes_binary?'HERMES_SKILL_MISSING':'HERMES_BINARY_MISSING'};
+    if (checks.hermes_binary && checks.hermes_skill) {
+      try { checks.publisher_preflight={status:'passed',transport:'hermes_cli',model:checks.hermes_model,reasoning_effort:checks.hermes_reasoning_effort,skill:'x-growth-publisher',dispatch_mode:config.publisher.dispatch_mode??'INLINE',runtime:await checkPublisherRuntime(config)}; }
+      catch (error) { checks.publisher_preflight={status:'failed',error:error instanceof Error?error.message:String(error)}; }
+    } else checks.publisher_preflight={status:'failed',error:checks.hermes_binary?'HERMES_SKILL_MISSING':'HERMES_BINARY_MISSING'};
   }
   const required = ['sqlite3', 'codex', 'codex_login', 'xactions_wrapper', 'lock_healthy', 'facts_ready'];
   if (options.auto) required.push('publisher_active'); else required.push('publisher_disabled');

@@ -24,6 +24,7 @@ design material. Use the V1 guides above for current daily CLI commands.
 8. [`founder-review-contract.md`](founder-review-contract.md) — exact JSON review/import shape.
 9. [`.env.example`](../.env.example) — optional non-secret local path overrides.
 10. [`v2-automatic-publication.md`](v2-automatic-publication.md) — automatic V2 command, policy gate, Hermes publisher, receipt, and recovery.
+11. [`v2-persistent-hermes-worker-plan.md`](v2-persistent-hermes-worker-plan.md) — serialized Browser Use/CDP worker, leases, spool, and rollout gates.
 
 The system is intentionally split into three responsibilities:
 

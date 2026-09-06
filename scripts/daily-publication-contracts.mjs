@@ -77,6 +77,18 @@ export const AutoPublicationReceiptSchema = z.object({
   error_message: z.string().optional(),
 }).strict();
 
+function isCanonicalPublishedReceipt(receipt) {
+  if (receipt.status !== 'PUBLISHED') return true;
+  if (!/^\d+$/.test(String(receipt.provider_id ?? ''))) return false;
+  try {
+    const url = new URL(receipt.permalink);
+    return url.protocol === 'https:' && url.hostname === 'x.com' &&
+      new RegExp(`^/${receipt.publisher_account}/status/${receipt.provider_id}$`).test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 export function requestHash(requestWithoutHash) { return sha256(stableStringify(requestWithoutHash)); }
 
 export function buildPublicationRequest(action, approval, grant, now = new Date()) {
@@ -118,6 +130,7 @@ export function verifyReceipt(request, receipt) {
   if (validRequest.publisher_account !== validRequest.grant.publisher_account) throw new Error('PUBLICATION_GRANT_ACCOUNT_MISMATCH');
   if (validReceipt.request_id !== validRequest.request_id || validReceipt.action_id !== validRequest.action.action_id || validReceipt.publisher_account !== validRequest.publisher_account || validReceipt.idempotency_key !== validRequest.idempotency_key || validReceipt.action_hash !== validRequest.action_hash || validReceipt.request_hash !== validRequest.request_hash) throw new Error('PUBLICATION_RECEIPT_BINDING_MISMATCH');
   if (validReceipt.status === 'PUBLISHED' && (!validReceipt.provider_id || !validReceipt.permalink)) throw new Error('PUBLISHED_RECEIPT_MISSING_READBACK');
+  if (!isCanonicalPublishedReceipt(validReceipt)) throw new Error('PUBLISHED_RECEIPT_INVALID_PERMALINK');
   return validReceipt;
 }
 
@@ -130,5 +143,6 @@ export function verifyAutoReceipt(request, receipt) {
   if (validRequest.publisher_account !== validRequest.grant.publisher_account) throw new Error('PUBLICATION_GRANT_ACCOUNT_MISMATCH');
   if (validReceipt.request_id !== validRequest.request_id || validReceipt.action_id !== validRequest.action.action_id || validReceipt.publisher_account !== validRequest.publisher_account || validReceipt.idempotency_key !== validRequest.idempotency_key || validReceipt.action_hash !== validRequest.action_hash || validReceipt.request_hash !== validRequest.request_hash) throw new Error('PUBLICATION_RECEIPT_BINDING_MISMATCH');
   if (validReceipt.status === 'PUBLISHED' && (!validReceipt.provider_id || !validReceipt.permalink)) throw new Error('PUBLISHED_RECEIPT_MISSING_READBACK');
+  if (!isCanonicalPublishedReceipt(validReceipt)) throw new Error('PUBLISHED_RECEIPT_INVALID_PERMALINK');
   return validReceipt;
 }

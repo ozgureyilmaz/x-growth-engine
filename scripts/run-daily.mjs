@@ -256,11 +256,11 @@ export async function executeDaily(options={}) {
       if(maxDrafts>0&&!selected.length)decisions.push(makeNoAction(contexts.length?'QUALITY_BELOW_THRESHOLD':'LOW_RELEVANCE',[...posts.keys()]));
       for(const d of selected)await store.saveDraft(runId,d);
       for(const d of decisions)if(d.action_type==='NO_ACTION')await store.saveNoAction(runId,d);
-      const publication={dry_run:Boolean(options.dryRun),attempted:0,published:0,failed:0,reconciliation_required:0,blocked:0,requests:[],receipts:[]};
+      const publication={dry_run:Boolean(options.dryRun),dispatch_mode:config.publisher.dispatch_mode??'INLINE',attempted:0,queued:0,published:0,failed:0,reconciliation_required:0,blocked:0,requests:[],receipts:[]};
       if(autoMode&&selected.length){
         const grant={grant_id:`grant_${runId}`,publisher_account:'nullquanty',expires_at:new Date(now.getTime()+config.intelligence.run_timeout_ms).toISOString(),max_actions:maxDrafts};
         const priorActions=await store.publicationHistory();
-        if(!options.dryRun)publisher=options.publisher||new HermesXPublisher({hermesCommand:hermesCommand(),model:'gpt-5.6-luna',reasoningEffort:'xhigh',timeoutMs:config.publisher.action_timeout_ms,cwd:ROOT});
+        if(!options.dryRun&&config.publisher.dispatch_mode!=='WORKER')publisher=options.publisher||new HermesXPublisher({hermesCommand:hermesCommand(),model:'gpt-5.6-luna',reasoningEffort:'xhigh',timeoutMs:config.publisher.action_timeout_ms,cwd:ROOT});
         try{
           for(const draft of selected){
             throwIfAborted(signal);
@@ -270,6 +270,15 @@ export async function executeDaily(options={}) {
             if(policy.decision!=='ALLOW'){publication.blocked+=1;decisions.push({kind:'POLICY_BLOCKED',action_id:draft.action_id,reasons:policy.reasons});continue;}
             const request=buildAutoPublicationRequest(draft,policy,grant,now,runId);publication.requests.push(request);
             if(options.dryRun){await atomicJson(path.join(out,`publication-request-${draft.action_id}.json`),request);continue;}
+            if(config.publisher.dispatch_mode==='WORKER'){
+              const requestPath=path.join(out,`publication-request-${draft.action_id}.json`);
+              const spoolPending=resolvePath(config.publisher.worker_spool);
+              await atomicJson(requestPath,request);
+              await atomicJson(path.join(spoolPending,'pending',`${request.request_id}.json`),request);
+              await store.createPublicationRequest(request);
+              publication.queued+=1;
+              continue;
+            }
             let claimed=false;
             try{
               const requestPath=path.join(out,`publication-request-${draft.action_id}.json`);await atomicJson(requestPath,request);await store.createPublicationRequest(request);const claim=await store.claimPublicationRequest(request.request_id);if(!claim)throw new Error('PUBLICATION_CLAIM_FAILED');
@@ -288,7 +297,7 @@ export async function executeDaily(options={}) {
           }
         }finally{if(publisher)await publisher.close().catch(()=>undefined);publisher=undefined;}
       }
-      const status=maxDrafts===0?'DISCOVERY_COMPLETE':!autoMode?(selected.length?'READY_FOR_FOUNDER_REVIEW':'NO_ACTION'):options.dryRun?'AUTO_DRY_RUN':publication.reconciliation_required?'RECONCILIATION_REQUIRED':publication.failed?'PARTIAL':publication.published?'AUTO_PUBLISHED':'NO_ACTION';
+      const status=maxDrafts===0?'DISCOVERY_COMPLETE':!autoMode?(selected.length?'READY_FOR_FOUNDER_REVIEW':'NO_ACTION'):options.dryRun?'AUTO_DRY_RUN':publication.reconciliation_required?'RECONCILIATION_REQUIRED':publication.failed?'PARTIAL':publication.published?'AUTO_PUBLISHED':publication.queued?'AUTO_QUEUED':'NO_ACTION';
       const bundle={schema_version:'1.0',message_type:'X_FOUNDER_REVIEW_BUNDLE',run_id:runId,mode,generated_at:nowIso(),source_contexts:[...posts.values()].map(p=>({provider_id:p.provider_id,url:p.url,username:p.username,text:p.text,timestamp:p.timestamp})),context_details:contexts,facts,decisions,drafts:selected,no_action_count:decisions.filter(d=>d.action_type==='NO_ACTION').length,source_health:health,status,model_calls:calls,publisher_enabled:autoMode&&config.publisher.enabled,publication:autoMode?publication:undefined};
       throwIfAborted(signal);await store.writeReviewBundle(path.join(out,'founder-review.json'),bundle);await writeFile(path.join(out,'founder-review.md'),markdownBundle(bundle),{mode:0o600});
       if(autoMode)await atomicJson(path.join(out,'auto-summary.json'),{schema_version:'2.0',message_type:'X_AUTO_PUBLISH_SUMMARY',run_id:runId,mode,status,dry_run:publication.dry_run,...publication,publication,generated_at:nowIso()});

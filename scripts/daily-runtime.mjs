@@ -27,6 +27,19 @@ export const ConfigSchema = z.object({
     z.object({enabled:z.literal(false),mode:z.literal('MANUAL_ONLY'),kill_switch:z.literal(true)}).strict(),
     z.object({
       enabled:z.literal(true), mode:z.literal('AUTOMATIC'), kill_switch:z.boolean(),
+      dispatch_mode:z.enum(['INLINE','WORKER']).default('INLINE'),
+      worker_spool:z.string().min(1).default('outputs/publication-spool'),
+      worker_lock_path:z.string().min(1).default('outputs/daily/.publisher-worker.lock'),
+      worker_poll_ms:z.number().int().positive().max(60000).default(5000),
+      worker_lease_ms:z.number().int().positive().max(3600000).default(900000),
+      browser:z.object({
+        backend:z.literal('browser-use').default('browser-use'),
+        cdp_url:z.string().url().optional(),
+        profile:z.literal('Default').default('Default'),
+        expected_account:z.literal('nullquanty').default('nullquanty'),
+        require_health:z.boolean().default(false),
+        health_timeout_ms:z.number().int().positive().max(60000).default(10000),
+      }).strict().default({}),
       max_actions_per_run:count.max(5).default(5), action_timeout_ms:count.default(60000),
       readback_attempts:count.max(5).default(3), readback_delay_ms:z.number().int().nonnegative().default(5000),
       inter_action_delay_seconds:z.number().nonnegative().default(5),
@@ -37,12 +50,16 @@ export const ConfigSchema = z.object({
   if (value.mode === 'EXPERIMENTAL_LIVE_AUTO' && (value.publisher.enabled !== true || value.publisher.mode !== 'AUTOMATIC')) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['publisher'], message: 'automatic mode requires an enabled automatic publisher' });
   }
+  if (value.mode === 'EXPERIMENTAL_LIVE_AUTO' && value.publisher.dispatch_mode === 'WORKER' && value.publisher.browser.require_health !== true) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['publisher', 'browser', 'require_health'], message: 'worker publication requires a live Browser Use/CDP health gate' });
+  }
 });
 
 export async function loadConfig(file=resolvePath('config/daily-experiment.json')) {
   const value=await loadJson(file);
   value.source.command=process.env.XGE_XACTIONS_MCP_COMMAND || value.source.command;
   value.codex.binary=process.env.CODEX_EXEC_BIN || value.codex.binary;
+  if (value.publisher?.browser && process.env.XGE_CDP_WS) value.publisher.browser.cdp_url=process.env.XGE_CDP_WS;
   if (/^(1|true|yes)$/i.test(String(process.env.XGE_PUBLISHER_KILL_SWITCH ?? ''))) value.publisher.kill_switch=true;
   return ConfigSchema.parse(value);
 }

@@ -50,6 +50,15 @@ export class DailyStore {
       CREATE TABLE IF NOT EXISTS publication_receipts(request_id TEXT PRIMARY KEY,action_id TEXT NOT NULL,action_hash TEXT NOT NULL,status TEXT NOT NULL,provider_id TEXT,permalink TEXT,observed_at TEXT NOT NULL,error_code TEXT,error_message TEXT,payload_json TEXT NOT NULL);
       INSERT INTO schema_migrations VALUES('004_publication_ledger',strftime('%Y-%m-%dT%H:%M:%fZ','now'));
       COMMIT;`);
+    const workerMigrated = runSql(this.database, "SELECT 1 AS done FROM schema_migrations WHERE version='005_publisher_worker_leases';", true);
+    if (!workerMigrated.length) runSql(this.database, `BEGIN IMMEDIATE;
+      ALTER TABLE publication_requests ADD COLUMN owner_token TEXT;
+      ALTER TABLE publication_requests ADD COLUMN lease_expires_at TEXT;
+      ALTER TABLE publication_requests ADD COLUMN dispatch_started_at TEXT;
+      ALTER TABLE publication_requests ADD COLUMN attempt_count INTEGER NOT NULL DEFAULT 0;
+      CREATE INDEX IF NOT EXISTS publication_requests_pending_idx ON publication_requests(status,created_at);
+      INSERT INTO schema_migrations VALUES('005_publisher_worker_leases',strftime('%Y-%m-%dT%H:%M:%fZ','now'));
+      COMMIT;`);
     this.initialized = true;
     await chmod(this.database,0o600);
   }
@@ -188,15 +197,30 @@ export class DailyStore {
     return (await this.listPublicationRequests(request.run_id)).find((item) => item.request_id === request.request_id) ?? request;
   }
 
-  async claimPublicationRequest(requestId) {
+  async claimPublicationRequest(requestId, options = {}) {
     await this.init();
     const now = new Date().toISOString();
-    runSql(this.database, `BEGIN IMMEDIATE; UPDATE publication_requests SET status='CLAIMED',claimed_at=COALESCE(claimed_at,${quote(now)}),updated_at=${quote(now)} WHERE request_id=${quote(requestId)} AND status='PENDING'; COMMIT;`);
-    const row = runSql(this.database, `SELECT request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,claimed_at,updated_at,payload_json FROM publication_requests WHERE request_id=${quote(requestId)};`, true)[0];
+    const ownerToken = options.ownerToken ? String(options.ownerToken) : '';
+    const leaseMs = Number.isFinite(options.leaseMs) ? Math.max(1000, Number(options.leaseMs)) : 900000;
+    const leaseExpires = new Date(Date.now() + leaseMs).toISOString();
+    const ownerSql = ownerToken ? quote(ownerToken) : 'NULL';
+    runSql(this.database, `BEGIN IMMEDIATE;
+      UPDATE publication_requests
+      SET status='CLAIMED',claimed_at=COALESCE(claimed_at,${quote(now)}),updated_at=${quote(now)},owner_token=${ownerSql},lease_expires_at=${quote(leaseExpires)},dispatch_started_at=${quote(now)},attempt_count=COALESCE(attempt_count,0)+1
+      WHERE request_id=${quote(requestId)} AND (status='PENDING' OR (status='CLAIMED' AND owner_token=${ownerSql} AND lease_expires_at < ${quote(now)}));
+      COMMIT;`);
+    const row = runSql(this.database, `SELECT request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,claimed_at,updated_at,owner_token,lease_expires_at,dispatch_started_at,attempt_count,payload_json FROM publication_requests WHERE request_id=${quote(requestId)};`, true)[0];
+    if (ownerToken && row?.status === 'CLAIMED' && row.owner_token !== ownerToken) return undefined;
     return row ? { ...row, payload: JSON.parse(row.payload_json) } : undefined;
   }
 
-  async savePublicationReceipt(value) {
+  async getPublicationRequest(requestId) {
+    await this.init();
+    const row = runSql(this.database, `SELECT request_id,run_id,action_id,action_hash,request_hash,idempotency_key,status,created_at,claimed_at,updated_at,owner_token,lease_expires_at,dispatch_started_at,attempt_count,payload_json FROM publication_requests WHERE request_id=${quote(requestId)};`, true)[0];
+    return row ? { ...row, payload: JSON.parse(row.payload_json) } : undefined;
+  }
+
+  async savePublicationReceipt(value, options = {}) {
     const receipt = AutoPublicationReceiptSchema.parse(value);
     await this.init();
     const request = runSql(this.database, `SELECT action_id,action_hash FROM publication_requests WHERE request_id=${quote(receipt.request_id)};`, true)[0];
@@ -208,7 +232,16 @@ export class DailyStore {
       if (fields.some((field) => prior[field] !== receipt[field])) throw new Error('PUBLICATION_RECEIPT_CONFLICT');
       return AutoPublicationReceiptSchema.parse(prior);
     }
-    runSql(this.database, `INSERT OR REPLACE INTO publication_receipts(request_id,action_id,action_hash,status,provider_id,permalink,observed_at,error_code,error_message,payload_json) VALUES(${quote(receipt.request_id)},${quote(receipt.action_id)},${quote(receipt.action_hash)},${quote(receipt.status)},${quote(receipt.provider_id)},${quote(receipt.permalink)},${quote(receipt.observed_at)},${quote(receipt.error_code)},${quote(receipt.error_message)},${quote(JSON.stringify(receipt))}); UPDATE publication_requests SET status=${quote(receipt.status)},updated_at=${quote(receipt.observed_at)} WHERE request_id=${quote(receipt.request_id)}; UPDATE actions SET status=${quote(receipt.status)} WHERE action_id=${quote(receipt.action_id)};`);
+    const ownerToken = options.ownerToken ? String(options.ownerToken) : '';
+    if (ownerToken) {
+      const owned = runSql(this.database, `SELECT owner_token,status FROM publication_requests WHERE request_id=${quote(receipt.request_id)};`, true)[0];
+      if (!owned || (owned.owner_token && owned.owner_token !== ownerToken)) throw new Error('PUBLICATION_CLAIM_OWNER_MISMATCH');
+    }
+    runSql(this.database, `BEGIN IMMEDIATE;
+      INSERT OR REPLACE INTO publication_receipts(request_id,action_id,action_hash,status,provider_id,permalink,observed_at,error_code,error_message,payload_json) VALUES(${quote(receipt.request_id)},${quote(receipt.action_id)},${quote(receipt.action_hash)},${quote(receipt.status)},${quote(receipt.provider_id)},${quote(receipt.permalink)},${quote(receipt.observed_at)},${quote(receipt.error_code)},${quote(receipt.error_message)},${quote(JSON.stringify(receipt))});
+      UPDATE publication_requests SET status=${quote(receipt.status)},updated_at=${quote(receipt.observed_at)},owner_token=NULL,lease_expires_at=NULL WHERE request_id=${quote(receipt.request_id)};
+      UPDATE actions SET status=${quote(receipt.status)} WHERE action_id=${quote(receipt.action_id)};
+      COMMIT;`);
     return receipt;
   }
 

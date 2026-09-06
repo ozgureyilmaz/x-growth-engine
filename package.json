@@ -6,6 +6,7 @@
   "description": "Bounded X research, draft intelligence, and policy-gated automatic publication for Marx prospect discovery",
   "scripts": {
     "daily": "node scripts/run-daily.mjs",
+    "publisher": "node scripts/publication-worker.mjs",
     "review": "node scripts/review.mjs",
     "check": "for file in scripts/*.mjs; do node --check \"$file\"; done",
     "test": "node --test tests/*.test.mjs"
