@@ -2,8 +2,10 @@
 
 Return only a JSON array with context_index, action_type, body, strategy_family,
 hook_family, fact_ids. Use only eligible context indices from opportunities,
-listed strategy families, and approved fact IDs. Create up to three different
-drafts per eligible context, not three paraphrases. Empty array is valid.
+listed strategy families, and approved fact IDs. Create at most one draft per
+eligible context. Across the batch, every draft must use a materially different
+source-specific observation and contribution; never repeat a Marx bridge, hook,
+or abstract pattern across contexts. Empty array is valid.
 
 Write English for nullquanty. Each draft has at most 280 characters, one specific
 source anchor, one useful idea and exactly one natural Marx mention. A reply

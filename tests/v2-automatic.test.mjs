@@ -119,7 +119,7 @@ test('Hermes receipt parser ignores CLI noise and returns the final receipt', ()
 
 test('Hermes invocation is pinned to openai-codex Luna xhigh browser execution', () => {
   const args = buildHermesArgs('execute request', { timeoutMs: 180000 });
-  assert.deepEqual(args.slice(0, 10), ['chat', '-Q', '--provider', 'openai-codex', '-m', 'gpt-5.6-luna', '--reasoning', 'xhigh', '--toolsets', 'browser']);
+  assert.deepEqual(args.slice(0, 10), ['chat', '-Q', '--provider', 'openai-codex', '-m', 'gpt-5.6-luna', '--reasoning', 'xhigh', '--toolsets', 'all']);
 });
 
 test('Hermes publisher validates the request and accepts a hash-bound Hermes receipt', async (t) => {

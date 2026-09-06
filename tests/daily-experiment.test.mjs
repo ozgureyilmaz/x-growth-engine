@@ -94,6 +94,14 @@ test('deterministic QA rejects promotional slop and accepts a contextual contrib
   assert.equal(deterministicQa('For the backtesting agent, log costs and failed fills first. Marx can make that evidence inspectable.', context, [], options).passed, true);
 });
 
+test('deterministic QA allows analytical buy/sell wording but blocks direct recommendations', () => {
+  const context = { post: { text: 'agent handoff and execution controls' } };
+  const analytical = deterministicQa('Keep the evidence with the buy/sell label; Marx can host the debate.', context, [], { max_chars: 280, marx_mentions: 1, links_allowed: false, ctas_allowed: false, hashtags_allowed: false });
+  assert.ok(!analytical.reasons.includes('FINANCIAL_ADVICE'));
+  const recommendation = deterministicQa('Buy BTC now; Marx can host the debate.', context, [], { max_chars: 280, marx_mentions: 1, links_allowed: false, ctas_allowed: false, hashtags_allowed: false });
+  assert.ok(recommendation.reasons.includes('FINANCIAL_ADVICE'));
+});
+
 test('a missing or low-quality evaluator result cannot become publishable', () => {
   const context = { post: { provider_id: '1001', url: 'https://x.com/builder/status/1001', username: 'builder', text: 'Building an AI trading agent' }, context_hash: 'a'.repeat(64) };
   const options = { max_chars: 280, marx_mentions: 1, links_allowed: false, ctas_allowed: false, hashtags_allowed: false, strategies: ['EVIDENCE_AND_PROVENANCE'], priorBodies: [], min_evaluation_score: 0.72, max_spam_risk: 0.2, max_repetition_risk: 0.25, max_unsupported_claim_risk: 0.15 };

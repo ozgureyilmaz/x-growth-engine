@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { AutoPublicationRequestSchema, AutoPublicationReceiptSchema, verifyAutoReceipt } from './daily-publication-contracts.mjs';
@@ -6,6 +6,27 @@ import { errorCode } from './daily-runtime.mjs';
 
 function receiptBase(request) {
   return { schema_version:'2.0',message_type:'X_PUBLICATION_RECEIPT',request_id:request.request_id,action_id:request.action.action_id,publisher_account:request.publisher_account,idempotency_key:request.idempotency_key,action_hash:request.action_hash,request_hash:request.request_hash,observed_at:new Date().toISOString() };
+}
+
+function closeStalePublisherSession(pathValue, env) {
+  // Clear Hermes-owned sessions before dispatch so a preflight or timed-out
+  // worker cannot leave a dead CDP endpoint cached for the publisher.
+  const npx = process.env.NPX_BIN || 'npx';
+  try {
+    spawnSync(npx, ['--yes', 'agent-browser@^0.26.0', 'close', '--all'], {
+      cwd:pathValue, env, stdio:'ignore', timeout:10000,
+    });
+    // Browser Use keeps a daemon outside the CLI session. If it survives a
+    // timed-out real-profile run, it can hand the next worker a dead CDP port.
+    // Kill only the managed Browser Use daemon; the next Hermes invocation
+    // starts a fresh one on demand.
+    spawnSync('pkill', ['-TERM', '-f', 'browser_harness.daemon'], {
+      cwd:pathValue, env, stdio:'ignore', timeout:5000,
+    });
+    spawnSync('pkill', ['-TERM', '-f', 'agent-browser-darwin-arm64'], {
+      cwd:pathValue, env, stdio:'ignore', timeout:5000,
+    });
+  } catch { /* stale-session cleanup is best effort; publisher remains fail-closed */ }
 }
 
 export function parseHermesReceipt(raw) {
@@ -32,11 +53,21 @@ export function runHermesCli(requestPath, options={}) {
   const prompt=[
     'Execute exactly one X_PUBLICATION_REQUEST JSON file using the browser tool.',
     `REQUEST_PATH: ${requestPath}`,
+    `Use a fresh browser session named xpub_${request.action.action_id.slice(-12)}; do not reuse a generic or prior session.`,
     'Use the request body and target exactly. Verify the signed-in account is @nullquanty. Do not ask for or print API keys, cookies, auth_token, or ct0. Do not use X API tools. Return only one X_PUBLICATION_RECEIPT JSON object after visible read-back verification. If the result is uncertain, return RECONCILIATION_REQUIRED and never retry.',
   ].join('\n');
   const args=buildHermesArgs(prompt,{model,reasoning,timeoutMs});
   return new Promise((resolve,reject)=>{
-    const child=spawn(command,args,{cwd:options.cwd,stdio:['ignore','pipe','pipe'],env:{PATH:process.env.PATH||'',HOME:process.env.HOME||'',LANG:process.env.LANG||'en_US.UTF-8',TERM:process.env.TERM||'dumb'}});
+    const home=process.env.HOME||'';
+    const managedBins=[path.join(home,'.hermes','bin'),path.join(home,'.local','bin')].filter(Boolean);
+    const inheritedPath=process.env.PATH||'';
+    const PATH=[...managedBins,inheritedPath].filter(Boolean).join(path.delimiter);
+    const safeEnv={PATH,HOME:home,LANG:process.env.LANG||'en_US.UTF-8',TERM:process.env.TERM||'dumb'};
+    for (const key of ['USER','LOGNAME','SHELL','TMPDIR','XDG_CONFIG_HOME','XDG_CACHE_HOME','XDG_DATA_HOME','XDG_RUNTIME_DIR','HERMES_HOME']) {
+      if (process.env[key]) safeEnv[key]=process.env[key];
+    }
+    closeStalePublisherSession(options.cwd, safeEnv);
+    const child=spawn(command,args,{cwd:options.cwd,stdio:['ignore','pipe','pipe'],env:safeEnv});
     let stdout='',stderr='',settled=false;
     const timer=setTimeout(()=>{if(settled)return;settled=true;child.kill('SIGTERM');setTimeout(()=>child.kill('SIGKILL'),5000);reject(new Error('HERMES_TIMEOUT'));},timeoutMs);
     child.stdout.on('data',chunk=>{stdout+=chunk.toString();if(stdout.length>2_000_000){settled=true;child.kill('SIGTERM');reject(new Error('HERMES_OUTPUT_TOO_LARGE'));}});
@@ -47,7 +78,9 @@ export function runHermesCli(requestPath, options={}) {
 }
 
 export function buildHermesArgs(prompt, options={}) {
-  return ['chat','-Q','--provider','openai-codex','-m',options.model||'gpt-5.6-luna','--reasoning',options.reasoning||'xhigh','--toolsets','browser','--max-turns','20','--run-budget',String(Math.ceil((options.timeoutMs||180000)/1000)),'-q',prompt];
+  // Hermes' managed Browser Use backend is exposed through the full tool registry;
+  // the legacy `browser` group omits browser_exec when the backend is selected.
+  return ['chat','-Q','--provider','openai-codex','-m',options.model||'gpt-5.6-luna','--reasoning',options.reasoning||'xhigh','--toolsets','all','--skills','x-growth-publisher','--max-turns','20','--run-budget',String(Math.ceil((options.timeoutMs||180000)/1000)),'-q',prompt];
 }
 
 export class HermesXPublisher {

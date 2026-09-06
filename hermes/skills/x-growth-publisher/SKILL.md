@@ -24,6 +24,8 @@ Rules:
    - `QUOTE_DRAFT`: quote `action.target.post_url` with `action.body`.
 5. Use the browser tool and the existing authenticated session. Never ask for,
    print, or copy API keys, cookies, `auth_token`, or `ct0`.
+   Use a fresh browser session named from the request action ID for each
+   request; never reuse a generic or stale session name.
 6. After the action, verify the resulting post is visible and capture its
    provider ID and canonical permalink. A UI success toast without a visible
    result is not publication evidence.

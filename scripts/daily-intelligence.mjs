@@ -49,7 +49,9 @@ export function deterministicQa(body, context, priorBodies, options) {
   if (!options.hashtags_allowed && /(^|\s)#\w+/u.test(text)) reasons.push('HASHTAG_NOT_ALLOWED');
   if ((priorBodies ?? []).some((prior) => overlap(prior, text) >= 0.82)) reasons.push('NEAR_DUPLICATE');
   if (/(\b\w+\b)(?:\s+\1){2,}/i.test(text)) reasons.push('REPEATED_WORD');
-  if (/\b(buy|sell|short|long|price target|guarantee returns)\b/i.test(text)) reasons.push('FINANCIAL_ADVICE');
+  // Reject actionable recommendations, not analytical mentions such as
+  // "buy/sell label" or "buy-versus-sell classification".
+  if (/(?<![\/\w])(?:buy|sell|short|long)\s+(?:now|today|this|that|[A-Z$][A-Za-z0-9_$-]+)\b|\bprice target\b|\bguarantee(?:d)? returns?\b/i.test(text)) reasons.push('FINANCIAL_ADVICE');
   if (text.includes('\n\n')) reasons.push('FORMAT_INVALID');
   return { passed: reasons.length === 0, reasons };
 }
