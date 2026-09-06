@@ -1,5 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { AutoPublicationRequestSchema, AutoPublicationReceiptSchema, verifyAutoReceipt } from './daily-publication-contracts.mjs';
 import { errorCode } from './daily-runtime.mjs';
@@ -16,16 +17,18 @@ function closeStalePublisherSession(pathValue, env) {
     spawnSync(npx, ['--yes', 'agent-browser@^0.26.0', 'close', '--all'], {
       cwd:pathValue, env, stdio:'ignore', timeout:10000,
     });
-    // Browser Use keeps a daemon outside the CLI session. If it survives a
-    // timed-out real-profile run, it can hand the next worker a dead CDP port.
-    // Kill only the managed Browser Use daemon; the next Hermes invocation
-    // starts a fresh one on demand.
-    spawnSync('pkill', ['-TERM', '-f', 'browser_harness.daemon'], {
-      cwd:pathValue, env, stdio:'ignore', timeout:5000,
-    });
-    spawnSync('pkill', ['-TERM', '-f', 'agent-browser-darwin-arm64'], {
-      cwd:pathValue, env, stdio:'ignore', timeout:5000,
-    });
+    // Terminate only Hermes-owned agent-browser processes listed by Hermes'
+    // own PID files. Never use broad pkill patterns: they can terminate an
+    // unrelated browser-agent session or the user's browser.
+    const pidDir=path.join(env.HERMES_HOME||path.join(env.HOME||'', '.hermes'), '.agent-browser');
+    for (const file of readdirSync(pidDir,{withFileTypes:true}).filter(entry=>entry.isFile()&&entry.name.endsWith('.pid'))) {
+      const pid=Number.parseInt(readFileSync(path.join(pidDir,file.name),'utf8').trim(),10);
+      if(!Number.isInteger(pid)||pid<=0) continue;
+      const probe=spawnSync('ps',['-p',String(pid),'-o','command='],{encoding:'utf8',stdio:['ignore','pipe','ignore'],timeout:2000});
+      const commandLine=String(probe.stdout||'');
+      if(!commandLine.includes('.hermes')||!commandLine.includes('agent-browser')) continue;
+      try { process.kill(pid,'SIGTERM'); } catch { /* already exited */ }
+    }
   } catch { /* stale-session cleanup is best effort; publisher remains fail-closed */ }
 }
 
@@ -50,10 +53,11 @@ export function runHermesCli(requestPath, options={}) {
   const model=options.model||'gpt-5.6-luna';
   const reasoning=options.reasoningEffort||'xhigh';
   const timeoutMs=options.timeoutMs||180000;
+  const actionId=String(options.actionId||path.basename(requestPath,'.json')).replace(/[^a-zA-Z0-9_-]/g,'_');
   const prompt=[
     'Execute exactly one X_PUBLICATION_REQUEST JSON file using the browser tool.',
     `REQUEST_PATH: ${requestPath}`,
-    `Use a fresh browser session named xpub_${request.action.action_id.slice(-12)}; do not reuse a generic or prior session.`,
+    `Use a fresh browser session named xpub_${actionId.slice(-12)}; do not reuse a generic or prior session.`,
     'Use the request body and target exactly. Verify the signed-in account is @nullquanty. Do not ask for or print API keys, cookies, auth_token, or ct0. Do not use X API tools. Return only one X_PUBLICATION_RECEIPT JSON object after visible read-back verification. If the result is uncertain, return RECONCILIATION_REQUIRED and never retry.',
   ].join('\n');
   const args=buildHermesArgs(prompt,{model,reasoning,timeoutMs});
@@ -91,8 +95,11 @@ export class HermesXPublisher {
   async publishRequest(requestPath) {
     const request=AutoPublicationRequestSchema.parse(JSON.parse(await readFile(path.resolve(requestPath),'utf8')));
     let raw;
-    try { raw=await (this.options.runHermes||((file)=>runHermesCli(file,this.options)))(path.resolve(requestPath)); }
-    catch(error) { return {...receiptBase(request),status:'RECONCILIATION_REQUIRED',error_code:errorCode(error),error_message:'Hermes returned no verified receipt.',observed_at:new Date().toISOString()}; }
+    try { raw=await (this.options.runHermes||((file)=>runHermesCli(file,{...this.options,actionId:request.action.action_id})))(path.resolve(requestPath)); }
+    catch(error) {
+      const detail=String(error?.message||'Hermes returned no verified receipt.').replace(/[\r\n]+/g,' ').slice(-800);
+      return {...receiptBase(request),status:'RECONCILIATION_REQUIRED',error_code:errorCode(error),error_message:detail,observed_at:new Date().toISOString()};
+    }
     const parsed=parseHermesReceipt(raw);
     if(!parsed) return {...receiptBase(request),status:'RECONCILIATION_REQUIRED',error_code:'INVALID_HERMES_RECEIPT',error_message:'Hermes returned no schema-valid receipt.',observed_at:new Date().toISOString()};
     try { return verifyAutoReceipt(request,AutoPublicationReceiptSchema.parse(parsed)); }

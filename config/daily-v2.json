@@ -61,7 +61,7 @@
     "mode": "AUTOMATIC",
     "kill_switch": false,
     "max_actions_per_run": 5,
-      "action_timeout_ms": 180000,
+      "action_timeout_ms": 600000,
     "readback_attempts": 3,
     "readback_delay_ms": 5000,
     "inter_action_delay_seconds": 5,
