@@ -66,7 +66,7 @@ export function runHermesCli(requestPath, options={}) {
     'Execute exactly one X_PUBLICATION_REQUEST JSON file using the browser tool.',
     `REQUEST_PATH: ${requestPath}`,
     `Use a fresh browser session named xpub_${actionId.slice(-12)}; do not reuse a generic or prior session.`,
-    `The engine already validated the request. Do not call skill_view or read_file. REQUEST_ID: ${requestId}. ACTION_ID: ${actionId}. ACTION_TYPE: ${actionType}. TARGET_URL: ${targetUrl}. EXACT_BODY: ${body}. IDEMPOTENCY_KEY: ${idempotencyKey}. ACTION_HASH: ${actionHash}. REQUEST_HASH: ${requestHash}`,
+    `The engine already validated the request. Do not call skill_view or read_file. REQUEST_ID: ${requestId}. ACTION_ID: ${actionId}. ACTION_TYPE: ${actionType}. TARGET_URL: ${targetUrl}. EXACT_BODY: ${body}. IDEMPOTENCY_KEY: ${idempotencyKey}. ACTION_HASH: ${actionHash}. REQUEST_HASH: ${requestHash}. IMPORTANT FIELD MAPPING: the JSON action fields are action.action_id and action.action_type; there are no action.id or action.type fields. Validate and use action.action_id/action.action_type exactly.`,
     'Use exactly one browser_exec call for this request. In that single call, navigate to the target, verify the visible @nullquanty account, perform the exact action, perform visible read-back, and return the receipt. Do not use terminal, execute_code, skill_view, read_file, or any second browser call. Do not generate, rewrite, or improve the body.',
     'Use the request body and target exactly. Verify the signed-in account is @nullquanty. Do not ask for or print API keys, cookies, auth_token, or ct0. Do not use X API tools. Return only one X_PUBLICATION_RECEIPT JSON object after visible read-back verification. If the result is uncertain, return RECONCILIATION_REQUIRED and never retry.',
   ].join('\n');
@@ -117,6 +117,6 @@ export class HermesXPublisher {
     const parsed=parseHermesReceipt(raw);
     if(!parsed) return {...receiptBase(request),status:'RECONCILIATION_REQUIRED',error_code:'INVALID_HERMES_RECEIPT',error_message:'Hermes returned no schema-valid receipt.',observed_at:new Date().toISOString()};
     try { return verifyAutoReceipt(request,AutoPublicationReceiptSchema.parse(parsed)); }
-    catch(error) { return {...receiptBase(request),status:'RECONCILIATION_REQUIRED',error_code:errorCode(error),error_message:'Hermes receipt did not bind to the exact request.',observed_at:new Date().toISOString()}; }
+    catch(error) { return {...receiptBase(request),status:'RECONCILIATION_REQUIRED',error_code:errorCode(error),error_message:`Hermes receipt did not bind to the exact request: ${String(error?.message||error).slice(-500)}`,observed_at:new Date().toISOString()}; }
   }
 }

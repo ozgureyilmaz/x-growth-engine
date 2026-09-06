@@ -16,6 +16,8 @@ Rules:
 2. Verify `message_type` is `X_PUBLICATION_REQUEST`, `schema_version` is `2.0`,
    `publisher_account` is `nullquanty`, and `authorization.mode` is
    `AUTOMATED_POLICY`.
+   The action fields are exactly `action.action_id` and `action.action_type`;
+   do not look for or invent `action.id` or `action.type`.
 3. Verify the visible signed-in X account is `@nullquanty`. If it is not, stop
    and return a failed receipt.
 4. Execute exactly one requested action:
