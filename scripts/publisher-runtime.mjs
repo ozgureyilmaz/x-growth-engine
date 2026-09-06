@@ -53,7 +53,7 @@ export async function checkPublisherRuntime(config = {}) {
   if (version.error || version.status !== 0) throw new Error('BROWSER_USE_BINARY_UNAVAILABLE');
   result.browser_use = String(version.stdout || version.stderr || '').trim().slice(0, 160);
   const health = spawnSync(executable, [], {
-    input: 'print(page_info())\n',
+    input: `new_tab("https://x.com/home")\nwait_for_load()\nprint(page_info())\nprint(js("document.body.innerText.slice(0,4000)"))\n`,
     encoding: 'utf8',
     timeout: browser.health_timeout_ms ?? 10000,
     env: { PATH: process.env.PATH, HOME: process.env.HOME, BU_CDP_WS: cdpUrl, BU_NAME: `xge_health_${process.pid}` },
