@@ -75,7 +75,16 @@ def execute(request_path, api):
           } return [...new Set(matches)];})()''' % json.dumps(action['body']))
 
     def set_exact_body(body):
-        return api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!e)return false;const wanted=" + json.dumps(body) + ";e.focus();e.innerText=wanted;e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:wanted}));e.dispatchEvent(new Event('change',{bubbles:true}));return e.innerText===wanted})()")
+        return api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!e)return false;const wanted=" + json.dumps(body) + ";e.focus();e.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,inputType:'insertText',data:wanted}));e.innerText=wanted;e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:wanted}));e.dispatchEvent(new Event('change',{bubbles:true}));return e.innerText===wanted})()")
+
+    def wait_for_submit_enabled(seconds=20):
+        deadline=time.monotonic()+seconds
+        state=None
+        while time.monotonic()<deadline:
+            state=api['js']("(() => {const e=[...document.querySelectorAll('[data-testid=\"tweetButtonInline\"],[data-testid=\"tweetButton\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return e ? {enabled:!e.disabled&&e.getAttribute('aria-disabled')!=='true',text:e.innerText||''} : null})()")
+            if isinstance(state,dict) and state.get('enabled'): return True
+            time.sleep(.5)
+        raise RuntimeError(f'COMPOSER_BODY_NOT_ACCEPTED:{state}')
 
     try:
         if marker.exists():
@@ -119,8 +128,7 @@ def execute(request_path, api):
         if not set_exact_body(action['body']):
             raise RuntimeError('EXACT_BODY_INSERT_FAILED')
         record('BODY_INSERTED')
-        if not api['js']("(() => {const e=[...document.querySelectorAll('[data-testid=\"tweetButtonInline\"],[data-testid=\"tweetButton\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return !!e && !e.disabled && e.getAttribute('aria-disabled')!=='true'})()"):
-            raise RuntimeError('COMPOSER_BODY_NOT_ACCEPTED')
+        wait_for_submit_enabled()
         record('COMPOSER_READY')
         identity()
         if datetime.fromisoformat(req['grant']['expires_at'].replace('Z', '+00:00')) <= datetime.now(timezone.utc):
