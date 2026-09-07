@@ -82,10 +82,11 @@ def execute(request_path, api):
         identity()
         record('ACCOUNT_VERIFIED')
         # Use X's inline reply textbox, scoped to the target conversation.
+        if not api['js']("document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
+            click('[data-testid="reply"]')
+            record('REPLY_CONTROL_CLICKED')
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]') !== null")
         record('COMPOSER_FOUND')
-        click('[data-testid="tweetTextarea_0"]')
-        record('COMPOSER_FOCUSED')
         api['fill_input']('[data-testid="tweetTextarea_0"]', action['body'], True, 15)
         record('BODY_INSERTED')
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]').innerText.trim() === " + json.dumps(action['body']))
