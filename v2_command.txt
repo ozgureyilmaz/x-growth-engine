@@ -1,0 +1,25 @@
+# V2 live automatic publishing
+# Run from the repository root. Keep the authenticated Chrome CDP process alive.
+
+cd /Users/0x79de/dev/x-growth-engine
+
+# Resolve the current Chrome CDP WebSocket endpoint for this shell.
+export XGE_CDP_WS="$(curl -fsS http://127.0.0.1:9222/json/version | python3 -c 'import json,sys; print(json.load(sys.stdin)["webSocketDebuggerUrl"])')"
+
+# Verify Chrome/Browser Use, @nullquanty, Hermes, facts, and policy readiness.
+npm run daily -- doctor \
+  --auto \
+  --config config/daily-v2.json
+
+# Discover fresh X posts and queue up to five policy-approved actions.
+npm run daily -- auto \
+  --config config/daily-v2.json \
+  --max-actions 5
+
+# Let the serialized Hermes worker publish the queued actions and write receipts.
+npm run publisher -- drain \
+  --config config/daily-v2.json
+
+# Optional long-lived worker after a successful canary:
+# npm run publisher -- watch \
+#   --config config/daily-v2.json
