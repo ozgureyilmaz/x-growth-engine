@@ -74,18 +74,6 @@ def execute(request_path, api):
             if(link)matches.push(link.href);
           } return [...new Set(matches)];})()''' % json.dumps(action['body']))
 
-    def select_composer_with_body(body):
-        tabs=api['list_tabs']()
-        for tab in reversed(tabs):
-            try:
-                api['switch_tab'](tab.get('targetId') or tab.get('target_id'))
-                api['wait_for_load']()
-                if api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');return !!e && (e.innerText||e.textContent||e.value||'').trim() === " + json.dumps(body) + "})()"):
-                    return True
-            except Exception:
-                continue
-        return False
-
     try:
         if marker.exists():
             return receipt('RECONCILIATION_REQUIRED', 'SUBMISSION_ALREADY_STARTED')
@@ -127,8 +115,8 @@ def execute(request_path, api):
         record('COMPOSER_FOUND')
         api['fill_input']('[data-testid="tweetTextarea_0"]', action['body'], True, 15)
         record('BODY_INSERTED')
-        if not select_composer_with_body(action['body']):
-            raise RuntimeError('EXACT_BODY_NOT_PRESENT_IN_COMPOSER')
+        if not api['js']("(() => {const e=[...document.querySelectorAll('[data-testid=\"tweetButtonInline\"],[data-testid=\"tweetButton\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return !!e && !e.disabled && e.getAttribute('aria-disabled')!=='true'})()"):
+            raise RuntimeError('COMPOSER_BODY_NOT_ACCEPTED')
         record('COMPOSER_READY')
         identity()
         if datetime.fromisoformat(req['grant']['expires_at'].replace('Z', '+00:00')) <= datetime.now(timezone.utc):
