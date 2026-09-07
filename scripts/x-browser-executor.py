@@ -108,6 +108,7 @@ def execute(request_path, api):
                 except Exception:
                     pass
         elif not api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
+            probe("(() => {const e=[...document.querySelectorAll('[data-testid=\"reply\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return !!e})()")
             js_click('[data-testid="reply"]')
             record('REPLY_CONTROL_CLICKED')
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]') !== null")
