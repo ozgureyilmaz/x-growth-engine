@@ -109,6 +109,13 @@ def execute(request_path, api):
         record('COMPOSER_FOUND')
         api['fill_input']('[data-testid="tweetTextarea_0"]', action['body'], True, 15)
         record('BODY_INSERTED')
+        if action['action_type'] == 'QUOTE_DRAFT':
+            try:
+                tabs=api['list_tabs']()
+                compose=next((t for t in reversed(tabs) if '/compose/post' in str(t.get('url',''))),None)
+                if compose: api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
+            except Exception:
+                pass
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]').innerText.trim() === " + json.dumps(action['body']))
         record('COMPOSER_READY')
         identity()
