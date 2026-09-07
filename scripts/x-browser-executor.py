@@ -75,9 +75,12 @@ def execute(request_path, api):
           } return [...new Set(matches)];})()''' % json.dumps(action['body']))
 
     def set_exact_body(body):
-        api['press_key']('a', 4)
-        api['press_key']('Backspace')
-        api['fill_input']('[data-testid="tweetTextarea_0"]', body, False, 15)
+        try:
+            api['press_key']('a', 4)
+            api['press_key']('Backspace')
+            api['fill_input']('[data-testid="tweetTextarea_0"]', body, False, 15)
+        except Exception as error:
+            raise RuntimeError(f'KEY_INPUT_FAILED:{type(error).__name__}:{" ".join(str(error).split())[:120]}')
         return api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!e)return false;const wanted=" + json.dumps(body) + ";e.innerText=wanted;e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:wanted}));e.dispatchEvent(new Event('change',{bubbles:true}));return e.innerText===wanted})()")
 
     def wait_for_submit_enabled(seconds=20):
