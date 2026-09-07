@@ -99,7 +99,9 @@ def execute(request_path, api):
                 try:
                     tabs=api['list_tabs']()
                     compose=next((t for t in tabs if '/compose/post' in str(t.get('url',''))),None)
-                    if compose: api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
+                    if compose:
+                        api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
+                        api['wait_for_load']()
                 except Exception:
                     pass
         elif not api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
@@ -113,7 +115,9 @@ def execute(request_path, api):
             try:
                 tabs=api['list_tabs']()
                 compose=next((t for t in reversed(tabs) if '/compose/post' in str(t.get('url',''))),None)
-                if compose: api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
+                if compose:
+                    api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
+                    api['wait_for_load']()
             except Exception:
                 pass
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]').innerText.trim() === " + json.dumps(action['body']))
