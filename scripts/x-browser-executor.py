@@ -74,6 +74,9 @@ def execute(request_path, api):
             if(link)matches.push(link.href);
           } return [...new Set(matches)];})()''' % json.dumps(action['body']))
 
+    def set_exact_body(body):
+        return api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!e)return false;const wanted=" + json.dumps(body) + ";e.focus();e.innerText=wanted;e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:wanted}));e.dispatchEvent(new Event('change',{bubbles:true}));return e.innerText===wanted})()")
+
     try:
         if marker.exists():
             return receipt('RECONCILIATION_REQUIRED', 'SUBMISSION_ALREADY_STARTED')
@@ -113,7 +116,8 @@ def execute(request_path, api):
             record('REPLY_CONTROL_CLICKED')
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]') !== null")
         record('COMPOSER_FOUND')
-        api['fill_input']('[data-testid="tweetTextarea_0"]', action['body'], True, 15)
+        if not set_exact_body(action['body']):
+            raise RuntimeError('EXACT_BODY_INSERT_FAILED')
         record('BODY_INSERTED')
         if not api['js']("(() => {const e=[...document.querySelectorAll('[data-testid=\"tweetButtonInline\"],[data-testid=\"tweetButton\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return !!e && !e.disabled && e.getAttribute('aria-disabled')!=='true'})()"):
             raise RuntimeError('COMPOSER_BODY_NOT_ACCEPTED')
