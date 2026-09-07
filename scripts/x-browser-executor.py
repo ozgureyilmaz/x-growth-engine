@@ -89,8 +89,10 @@ def execute(request_path, api):
         # Use X's inline reply textbox, scoped to the target conversation.
         if action['action_type'] == 'QUOTE_DRAFT':
             if not api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
+                probe("(() => {const e=[...document.querySelectorAll('[data-testid=\"retweet\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return !!e})()")
                 js_click('[data-testid="retweet"]')
                 record('RETWEET_MENU_OPENED')
+                probe("(() => [...document.querySelectorAll('[role=\"menuitem\"]')].some(x=>x.innerText.trim()==='Quote'))()")
                 js_click('[role="menuitem"]', 'Quote')
                 record('QUOTE_COMPOSER_OPENED')
                 time.sleep(1)

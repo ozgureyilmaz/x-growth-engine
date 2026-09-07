@@ -226,10 +226,10 @@ export class DailyStore {
     await this.init();
     const row=runSql(this.database,`SELECT r.status,r.attempt_count,c.payload_json FROM publication_requests r JOIN publication_receipts c USING(request_id) WHERE request_id=${quote(requestId)};`,true)[0];
     const receipt=row && JSON.parse(row.payload_json);
-    if(row?.status!=='FAILED'||row.attempt_count!==1||receipt?.error_code!=='BROWSER_EXECUTION_FAILED'||!/^(ACCOUNT_VERIFIED|COMPOSER_FOUND|COMPOSER_FOCUSED):/.test(receipt?.error_message||''))throw new Error('PRE_ACTION_RECOVERY_NOT_PROVEN');
+    if(row?.status!=='FAILED'||row.attempt_count>2||receipt?.error_code!=='BROWSER_EXECUTION_FAILED'||!/^(ACCOUNT_VERIFIED|COMPOSER_FOUND|COMPOSER_FOCUSED):/.test(receipt?.error_message||''))throw new Error('PRE_ACTION_RECOVERY_NOT_PROVEN');
     runSql(this.database,`BEGIN IMMEDIATE;
       CREATE TABLE IF NOT EXISTS publication_receipt_history(request_id TEXT NOT NULL,attempt INTEGER NOT NULL,payload_json TEXT NOT NULL,PRIMARY KEY(request_id,attempt));
-      INSERT INTO publication_receipt_history VALUES(${quote(requestId)},1,${quote(row.payload_json)});
+      INSERT INTO publication_receipt_history VALUES(${quote(requestId)},${Number(row.attempt_count)||1},${quote(row.payload_json)});
       DELETE FROM publication_receipts WHERE request_id=${quote(requestId)};
       UPDATE publication_requests SET status='PENDING',owner_token=NULL,lease_expires_at=NULL WHERE request_id=${quote(requestId)} AND status='FAILED';
       COMMIT;`);
