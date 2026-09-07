@@ -61,6 +61,15 @@ def execute(request_path, api):
         if not api['js'](expression):
             raise RuntimeError('CONTROL_NOT_ACTIVATED')
 
+    def switch_to_url(url):
+        tabs=api['list_tabs']()
+        for tab in reversed(tabs):
+            if str(tab.get('url','')).split('#',1)[0].split('?',1)[0] == url:
+                api['switch_tab'](tab.get('targetId') or tab.get('target_id'))
+                api['wait_for_load']()
+                return True
+        return False
+
     def identity():
         # A mention in a feed or profile title is not signed-in identity.
         return probe("(() => {const e=document.querySelector('[data-testid=\"SideNav_AccountSwitcher_Button\"]');const body=document.body?.innerText||'';return !!((e&&/(^|\\s)@nullquanty($|\\s)/i.test(e.innerText))||/(^|\\s)@nullquanty($|\\s)/i.test(body))})()")
@@ -103,6 +112,7 @@ def execute(request_path, api):
         record('VALIDATED')
         api['new_tab'](action['target']['post_url'])
         api['wait_for_load']()
+        switch_to_url(action['target']['post_url'])
         identity()
         record('ACCOUNT_VERIFIED')
         # Use X's inline reply textbox, scoped to the target conversation.
