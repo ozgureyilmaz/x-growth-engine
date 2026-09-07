@@ -98,10 +98,13 @@ def execute(request_path, api):
                 time.sleep(1)
                 try:
                     tabs=api['list_tabs']()
-                    compose=next((t for t in tabs if '/compose/post' in str(t.get('url',''))),None)
-                    if compose:
-                        api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
-                        api['wait_for_load']()
+                    for compose in reversed([t for t in tabs if '/compose/post' in str(t.get('url',''))]):
+                        try:
+                            api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
+                            api['wait_for_load']()
+                            if api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"): break
+                        except Exception:
+                            continue
                 except Exception:
                     pass
         elif not api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
@@ -111,15 +114,6 @@ def execute(request_path, api):
         record('COMPOSER_FOUND')
         api['fill_input']('[data-testid="tweetTextarea_0"]', action['body'], True, 15)
         record('BODY_INSERTED')
-        if action['action_type'] == 'QUOTE_DRAFT':
-            try:
-                tabs=api['list_tabs']()
-                compose=next((t for t in reversed(tabs) if '/compose/post' in str(t.get('url',''))),None)
-                if compose:
-                    api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
-                    api['wait_for_load']()
-            except Exception:
-                pass
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]').innerText.trim() === " + json.dumps(action['body']))
         record('COMPOSER_READY')
         identity()
