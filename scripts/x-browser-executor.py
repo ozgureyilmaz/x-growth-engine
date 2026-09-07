@@ -63,7 +63,7 @@ def execute(request_path, api):
 
     def identity():
         # A mention in a feed or profile title is not signed-in identity.
-        return probe("(() => {const e=document.querySelector('[data-testid=\"SideNav_AccountSwitcher_Button\"]');return e && /(^|\\s)@nullquanty($|\\s)/i.test(e.innerText)})()")
+        return probe("(() => {const e=document.querySelector('[data-testid=\"SideNav_AccountSwitcher_Button\"]');const body=document.body?.innerText||'';return !!((e&&/(^|\\s)@nullquanty($|\\s)/i.test(e.innerText))||/(^|\\s)@nullquanty($|\\s)/i.test(body))})()")
 
     def evidence():
         return api['js']('''(() => {const wanted=%s;const matches=[];
@@ -88,7 +88,7 @@ def execute(request_path, api):
         record('ACCOUNT_VERIFIED')
         # Use X's inline reply textbox, scoped to the target conversation.
         if action['action_type'] == 'QUOTE_DRAFT':
-            if not api['js']("document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
+            if not api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
                 js_click('[data-testid="retweet"]')
                 record('RETWEET_MENU_OPENED')
                 js_click('[role="menuitem"]', 'Quote')
@@ -100,7 +100,7 @@ def execute(request_path, api):
                     if compose: api['switch_tab'](compose.get('targetId') or compose.get('target_id'))
                 except Exception:
                     pass
-        elif not api['js']("document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
+        elif not api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
             js_click('[data-testid="reply"]')
             record('REPLY_CONTROL_CLICKED')
         probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]') !== null")
@@ -142,7 +142,8 @@ def execute(request_path, api):
         return receipt('RECONCILIATION_REQUIRED', 'READBACK_MISSING')
     except Exception as error:
         # Only exception type is retained; browser errors can contain secrets.
-        return receipt('RECONCILIATION_REQUIRED' if marker.exists() else 'FAILED', 'BROWSER_EXECUTION_FAILED', type(error).__name__)
+        detail=' '.join(str(error).split())[:180]
+        return receipt('RECONCILIATION_REQUIRED' if marker.exists() else 'FAILED', 'BROWSER_EXECUTION_FAILED', f'{type(error).__name__}: {detail}')
 
 
 if 'XGE_REQUEST_PATH' in globals():
