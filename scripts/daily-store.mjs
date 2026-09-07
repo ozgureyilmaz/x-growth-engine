@@ -4,7 +4,7 @@ import { hostname } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { eventEnvelope, DraftSchema, NoActionSchema, ReviewBundleSchema, stableStringify, sha256 } from './daily-contracts.mjs';
-import { AutoPublicationRequestSchema, AutoPublicationReceiptSchema } from './daily-publication-contracts.mjs';
+import { AutoPublicationRequestSchema, AutoPublicationReceiptSchema, verifyAutoReceipt } from './daily-publication-contracts.mjs';
 
 function quote(value) { return `'${String(value ?? '').replaceAll("'", "''")}'`; }
 
@@ -256,6 +256,23 @@ export class DailyStore {
       INSERT OR REPLACE INTO publication_receipts(request_id,action_id,action_hash,status,provider_id,permalink,observed_at,error_code,error_message,payload_json) VALUES(${quote(receipt.request_id)},${quote(receipt.action_id)},${quote(receipt.action_hash)},${quote(receipt.status)},${quote(receipt.provider_id)},${quote(receipt.permalink)},${quote(receipt.observed_at)},${quote(receipt.error_code)},${quote(receipt.error_message)},${quote(JSON.stringify(receipt))});
       UPDATE publication_requests SET status=${quote(receipt.status)},updated_at=${quote(receipt.observed_at)},owner_token=NULL,lease_expires_at=NULL WHERE request_id=${quote(receipt.request_id)};
       UPDATE actions SET status=${quote(receipt.status)} WHERE action_id=${quote(receipt.action_id)};
+      COMMIT;`);
+    return receipt;
+  }
+
+  async reconcilePublicationReceipt(value) {
+    const receipt=AutoPublicationReceiptSchema.parse(value);
+    if(receipt.status!=='PUBLISHED')throw new Error('RECONCILIATION_RECEIPT_MUST_BE_PUBLISHED');
+    await this.init();
+    const request=runSql(this.database,`SELECT payload_json FROM publication_requests WHERE request_id=${quote(receipt.request_id)};`,true)[0];
+    if(!request)throw new Error('PUBLICATION_RECEIPT_REQUEST_MISMATCH');
+    verifyAutoReceipt(JSON.parse(request.payload_json),receipt);
+    const existing=runSql(this.database,`SELECT status FROM publication_receipts WHERE request_id=${quote(receipt.request_id)};`,true)[0];
+    if(existing?.status!=='RECONCILIATION_REQUIRED')throw new Error('RECONCILIATION_STATE_INVALID');
+    runSql(this.database,`BEGIN IMMEDIATE;
+      UPDATE publication_receipts SET status='PUBLISHED',provider_id=${quote(receipt.provider_id)},permalink=${quote(receipt.permalink)},observed_at=${quote(receipt.observed_at)},error_code=NULL,error_message=NULL,payload_json=${quote(JSON.stringify(receipt))} WHERE request_id=${quote(receipt.request_id)};
+      UPDATE publication_requests SET status='PUBLISHED',updated_at=${quote(receipt.observed_at)},owner_token=NULL,lease_expires_at=NULL WHERE request_id=${quote(receipt.request_id)};
+      UPDATE actions SET status='PUBLISHED' WHERE action_id=${quote(receipt.action_id)};
       COMMIT;`);
     return receipt;
   }
