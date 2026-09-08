@@ -62,9 +62,12 @@ def execute(request_path, api):
             raise RuntimeError('CONTROL_NOT_ACTIVATED')
 
     def switch_to_url(url):
+        def comparable(value):
+            return str(value).split('#',1)[0].split('?',1)[0].rstrip('/')
+        wanted = comparable(url)
         tabs=api['list_tabs']()
         for tab in reversed(tabs):
-            if str(tab.get('url','')).split('#',1)[0].split('?',1)[0] == url:
+            if comparable(tab.get('url','')) == wanted:
                 api['switch_tab'](tab.get('targetId') or tab.get('target_id'))
                 api['wait_for_load']()
                 return True
@@ -72,7 +75,7 @@ def execute(request_path, api):
 
     def identity():
         # A mention in a feed or profile title is not signed-in identity.
-        return probe("(() => {const e=document.querySelector('[data-testid=\"SideNav_AccountSwitcher_Button\"]');const body=document.body?.innerText||'';return !!((e&&/(^|\\s)@nullquanty($|\\s)/i.test(e.innerText))||/(^|\\s)@nullquanty($|\\s)/i.test(body))})()")
+        return probe("""(() => {const e=document.querySelector('[data-testid=\"SideNav_AccountSwitcher_Button\"]');if(!e)return false;const r=e.getBoundingClientRect();if(!r.width||!r.height)return false;const text=[e.innerText,e.getAttribute('aria-label'),e.getAttribute('title')].filter(Boolean).join(' ');return /(?:^|[^A-Za-z0-9_])@nullquanty(?:$|[^A-Za-z0-9_])/i.test(text)})()""")
 
     def evidence():
         return api['js']('''(() => {const wanted=%s;const matches=[];
@@ -84,39 +87,54 @@ def execute(request_path, api):
           } return [...new Set(matches)];})()''' % json.dumps(action['body']))
 
     def set_exact_body(body):
+        # Browser Use's per-character key transport can hang on the macOS
+        # headless profile. X opens a blank composer for every new request, so
+        # use one native Input.insertText operation instead of key-by-key fill.
         try:
-            api['press_key']('a', 4)
-            api['press_key']('Backspace')
-            api['fill_input']('[data-testid="tweetTextarea_0"]', body, False, 15)
+            if not api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!e)return false;e.focus();return true})()"):
+                raise RuntimeError('COMPOSER_NOT_FOCUSABLE')
+            api['type_text'](body)
         except Exception as error:
             raise RuntimeError(f'KEY_INPUT_FAILED:{type(error).__name__}:{" ".join(str(error).split())[:120]}')
-        api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!e)return false;const wanted=" + json.dumps(body) + ";e.innerText=wanted;e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:wanted}));e.dispatchEvent(new Event('change',{bubbles:true}));return true})()")
+        wanted = json.dumps(body)
+        try:
+            probe("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');return !!e && e.innerText === %s})()" % wanted, 15)
+        except Exception as error:
+            raise RuntimeError(f'EXACT_BODY_NOT_VERIFIED:{type(error).__name__}') from error
+        if not api['js']("(() => {const e=document.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!e)return false;const wanted=" + wanted + ";e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:wanted}));e.dispatchEvent(new Event('change',{bubbles:true}));return e.innerText===wanted})()"):
+            raise RuntimeError('EXACT_BODY_EVENT_FAILED')
         return True
 
-    def wait_for_submit_enabled(seconds=20):
+    def wait_for_submit_enabled(body, seconds=20):
         deadline=time.monotonic()+seconds
         state=None
         while time.monotonic()<deadline:
-            state=api['js']("(() => {const e=[...document.querySelectorAll('[data-testid=\"tweetButtonInline\"],[data-testid=\"tweetButton\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return e ? {enabled:!e.disabled&&e.getAttribute('aria-disabled')!=='true',text:e.innerText||''} : null})()")
-            if isinstance(state,dict) and state.get('enabled'): return True
+            state=api['js']("(() => {const c=document.querySelector('[data-testid=\"tweetTextarea_0\"]');const e=[...document.querySelectorAll('[data-testid=\"tweetButtonInline\"],[data-testid=\"tweetButton\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return e ? {enabled:!e.disabled&&e.getAttribute('aria-disabled')!=='true',body:c?.innerText||''} : null})()")
+            if isinstance(state,dict) and state.get('enabled') and state.get('body') == body: return True
             time.sleep(.5)
         raise RuntimeError(f'COMPOSER_BODY_NOT_ACCEPTED:{state}')
 
     try:
         if marker.exists():
             return receipt('RECONCILIATION_REQUIRED', 'SUBMISSION_ALREADY_STARTED')
-        if req['publisher_account'] != 'nullquanty' or action['action_type'] not in ('REPLY_DRAFT', 'QUOTE_DRAFT'):
+        if req['publisher_account'] != 'nullquanty' or action['action_type'] not in ('POST_DRAFT', 'REPLY_DRAFT', 'QUOTE_DRAFT'):
             return receipt('FAILED', 'UNSUPPORTED_ACTION')
         if datetime.fromisoformat(req['grant']['expires_at'].replace('Z', '+00:00')) <= datetime.now(timezone.utc):
             return receipt('FAILED', 'PUBLICATION_GRANT_EXPIRED')
         record('VALIDATED')
-        api['new_tab'](action['target']['post_url'])
+        action_type = action['action_type']
+        destination = 'https://x.com/compose/post' if action_type == 'POST_DRAFT' else action['target']['post_url']
+        api['new_tab'](destination)
         api['wait_for_load']()
-        switch_to_url(action['target']['post_url'])
+        if not switch_to_url(destination):
+            raise RuntimeError('TARGET_TAB_NOT_FOUND')
         identity()
         record('ACCOUNT_VERIFIED')
-        # Use X's inline reply textbox, scoped to the target conversation.
-        if action['action_type'] == 'QUOTE_DRAFT':
+        # A standalone post uses the global composer; replies and quotes use
+        # the target conversation's composer.
+        if action_type == 'POST_DRAFT':
+            probe("document.querySelector('[data-testid=\"tweetTextarea_0\"]') !== null")
+        elif action_type == 'QUOTE_DRAFT':
             if not api['js']("!!document.querySelector('[data-testid=\"tweetTextarea_0\"]')"):
                 probe("(() => {const e=[...document.querySelectorAll('[data-testid=\"retweet\"]')].find(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0});return !!e})()")
                 js_click('[data-testid="retweet"]')
@@ -145,7 +163,7 @@ def execute(request_path, api):
         if not set_exact_body(action['body']):
             raise RuntimeError('EXACT_BODY_INSERT_FAILED')
         record('BODY_INSERTED')
-        wait_for_submit_enabled()
+        wait_for_submit_enabled(action['body'])
         record('COMPOSER_READY')
         identity()
         if datetime.fromisoformat(req['grant']['expires_at'].replace('Z', '+00:00')) <= datetime.now(timezone.utc):
